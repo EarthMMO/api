@@ -1,5 +1,11 @@
 import { Schema, model } from 'mongoose';
 
+export interface NFT {
+  name: string;
+  contractAddress: string;
+  tokenId: string;
+}
+
 export interface IUser {
   id: string;
   firstName: string;
@@ -9,7 +15,10 @@ export interface IUser {
   profileNFTIPFSHash?: string;
   ethereumAddress: string;
   publicKey: string;
-  pinHash: string;
+  pinHash?: string;
+  signature?: string;
+  derivationSuffix: number;
+  NFTs: Array<NFT>;
 }
 
 export const UsernameRegex = /(?!^(1|3|bc1|lnbc1))^[0-9a-z_]{3,50}$/i;
@@ -45,19 +54,18 @@ const UserSchema = new Schema<IUser>({
     minlength: 3,
     maxlength: 100,
   },
-
-  twitterHandle: {
-    type: String,
-    unique: true,
-    minlength: 1,
-    maxlength: 100,
-  },
   profileNFTIPFSHash: {
     type: String,
-    unique: true,
     required: true,
     maxlength: 250,
   },
+  NFTs: [
+    {
+      name: { type: String },
+      contractAddress: { type: String },
+      tokenId: { type: String },
+    },
+  ],
   ethereumAddress: {
     type: String,
     unique: true,
@@ -67,13 +75,13 @@ const UserSchema = new Schema<IUser>({
   },
   publicKey: {
     type: String,
-    unique: true,
     maxlength: 350,
   },
-  pinHash: {
-    type: String,
+
+  derivationSuffix: {
+    type: Number,
     unique: true,
-    maxLength: 350,
+    require: true,
   },
 });
 

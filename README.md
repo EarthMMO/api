@@ -54,3 +54,14 @@ module.exports = {
   ],
 };
 ```
+
+TODO
+
+1. Implement a good logging system
+2. Error handling and validation
+4. Add API input validation
+5. Add rate limiter on API
+6. Write test cases for each of the APIs
+7. Efficient way to managed environment variables
+8. Script to test all env variables before starting the server
+9. Clean up dependencies

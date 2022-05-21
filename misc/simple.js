@@ -1,6 +1,4 @@
-const {
-
-} = require('ethers');
+const ethers = require('ethers');
 
 
 const path = `m/44'/60'/0'/0/1`;
@@ -21,12 +19,13 @@ console.log("\n Wallet creation successful : ", { walletAddress, privateKey, mne
 const run = async () => {
 
     const a = await wallet.signMessage(Buffer.from("hello"))
+    console.log(a)
     // ethers.utils.verifyMessage
     console.log(ethers.utils.verifyMessage(Buffer.from("hello"), a))
     // return a
 }
 
-const wallet2 = ethers.Wallet.fromMnemonic(words, path)
+// const wallet2 = ethers.Wallet.fromMnemonic(words, path)
 
 run()
 

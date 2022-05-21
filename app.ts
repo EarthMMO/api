@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import defaultLogger, { logger } from './src/utils/logger';
 import { connect } from './src/utils/db_connect';
 import userRouter from './src/routers/user.router';
+import errorMiddleware from './src/middleware/error.middleware';
+const bip39 = require('bip39');
 
 const { networkInterfaces } = require('os');
 
@@ -39,8 +41,12 @@ const getNetworkAddress = () => {
 app.listen(port, async () => {
   await connect();
   getNetworkAddress();
+  const seed = bip39.mnemonicToSeedSync(process.env.MNEMONIC);
+  process.env.SEED_HEX = seed.toString('hex');
+
   const CORE_API_PATH_PREFIX = `/api/v${process.env.SERVER_VERSION as string}`;
   app.use(`${CORE_API_PATH_PREFIX}/user`, userRouter);
+  app.use(errorMiddleware);
 
   logger.info(`Server running on port ${process.env.SERVER_ADDRESS}:${port}`);
 });
