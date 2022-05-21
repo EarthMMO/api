@@ -50,7 +50,6 @@ const UserSchema = new Schema<IUser>({
 
   email: {
     type: String,
-    unique: true,
     minlength: 3,
     maxlength: 100,
   },

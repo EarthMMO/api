@@ -18,14 +18,17 @@ userRouter.post(
   '/',
   [
     check('firstName')
+      .optional()
       .isString()
       .isLength({ min: 3, max: 80 })
       .withMessage('Invalid firstName'),
     check('lastName')
+      .optional()
       .isString()
       .isLength({ min: 3, max: 80 })
       .withMessage('Invalid lastName'),
     check('email')
+      .optional()
       .isEmail()
       .isLength({ min: 3, max: 80 })
       .withMessage('Invalid email'),
