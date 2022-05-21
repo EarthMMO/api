@@ -148,7 +148,7 @@ export const updateUser = async (NFT: NFT, userId: string) => {
   try {
     const user = await User.findOne({ id: userId });
     if (!user) throw new CustomError('User not found', 400, '400', userId);
-    await User.updateOne({ id: userId }, { $push: { NFT } });
+    await User.updateOne({ id: userId }, { $push: { NFTs: NFT } });
   } catch (error: any) {
     logger.error('Error in updating the user : ', error);
     if (error instanceof CustomError) throw error;
