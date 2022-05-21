@@ -35,13 +35,7 @@ export const createUser = async (userRequest: createUserRequest) => {
       { _id: 1 }
     );
 
-    if (exitingUserDetails)
-      throw new CustomError(
-        'User already exists',
-        400,
-        '00001',
-        ethereumAddress
-      );
+    if (exitingUserDetails) return await loginUser(ethereumAddress, signature);
     // verify the signature
     const addressOfTheSigner = ether.utils.verifyMessage(
       Buffer.from('hello'),
