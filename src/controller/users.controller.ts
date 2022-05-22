@@ -32,10 +32,19 @@ export const createUser = async (userRequest: createUserRequest) => {
       userRequest;
     const exitingUserDetails = await User.findOne(
       { ethereumAddress },
-      { _id: 1 }
+      { _id: 1, profileNFTIPFSHash: 1 }
     );
 
-    if (exitingUserDetails) return await loginUser(ethereumAddress, signature);
+    if (exitingUserDetails) {
+      const jwtDetails = (await loginUser(ethereumAddress, signature)) as {
+        jwt: string;
+        userId: string;
+        profileNFTIPFSHash?: string;
+      };
+      // append profileNFTIPFSHash of the user and send it with JWT a
+      jwtDetails.profileNFTIPFSHash = exitingUserDetails.profileNFTIPFSHash;
+      return jwtDetails;
+    }
     // verify the signature
     const addressOfTheSigner = ether.utils.verifyMessage(
       Buffer.from('hello'),

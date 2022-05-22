@@ -6,6 +6,7 @@ import { connect } from './src/utils/db_connect';
 import userRouter from './src/routers/user.router';
 import errorMiddleware from './src/middleware/error.middleware';
 const bip39 = require('bip39');
+import cors from 'cors';
 
 const { networkInterfaces } = require('os');
 
@@ -13,6 +14,7 @@ dotenv.config();
 
 const app = express();
 
+app.use(cors());
 app.use(helmet()); // TODO use corsOptions on production)
 app.use(express.json({ limit: '1MB' }));
 app.use(defaultLogger);

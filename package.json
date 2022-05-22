@@ -6,6 +6,7 @@
     "bitcore-message": "^1.0.4",
     "blgr": "^0.2.0",
     "body-parser": "^1.20.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.0.1",
     "eccrypto": "^1.1.6",
     "eth-crypto": "^2.3.0",
