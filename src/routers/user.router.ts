@@ -2,6 +2,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import { check, validationResult } from 'express-validator';
 import {
   createUser,
+  getUser,
   loginUser,
   updateUser,
 } from '../controller/users.controller';
@@ -134,5 +135,15 @@ userRouter.patch(
       if (e instanceof CustomError) return next(e);
       return next(new CustomError(undefined, undefined, undefined, e));
     }
+  }
+);
+
+userRouter.get(
+  '/:userId',
+  validateJWT,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.params.userId;
+    const user = await getUser(userId);
+    res.status(200).send(user);
   }
 );
