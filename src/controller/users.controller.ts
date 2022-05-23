@@ -1,12 +1,12 @@
 // import ether from 'ethers';
 const ether = require('ethers');
-import { create } from 'ipfs-http-client';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
 import User, { NFT } from '../services/mongodb/users.schema';
 import { createToken } from '../utils/jwt';
 import { generateSecret } from '../utils/secret';
+import storeInIPFS from '../utils/store_in_ipfs';
 import CustomError from '../exceptions/custom_error';
 import { logger } from '../utils/logger';
 
@@ -15,11 +15,6 @@ import { logger } from '../utils/logger';
  * @param data
  * @returns
  */
-const storeInIPFS = async (data: string | Buffer): Promise<string> => {
-  const IPFSClient = create({ url: process.env.IPFS_CLIENT_URL as string });
-  const storageResponse = await IPFSClient.add(data);
-  return storageResponse.path as string;
-};
 
 /**
  * Creates user record for EarthMMO
