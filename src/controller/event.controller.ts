@@ -47,6 +47,9 @@ export const createEvent = async (request: IEvent) => {
       ItemNFTImageHash,
       adminUserId,
     });
+    fs.unlinkSync(
+      path.join(`${__dirname}/../../../static`, fileName as string)
+    );
     return { eventId, ItemNFTImageHash };
   } catch (error: any) {
     if (error instanceof CustomError) throw error;
