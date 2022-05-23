@@ -34,7 +34,6 @@ const EventSchema = new Schema<IEvent>({
   ItemNFTImageHash: {
     type: String,
     required: true,
-    unique: true,
   },
   itemEventId: {
     type: String,
@@ -45,7 +44,6 @@ const EventSchema = new Schema<IEvent>({
   adminUserId: {
     type: String,
     required: true,
-    unique: true,
   },
 });
 
