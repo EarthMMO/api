@@ -6,6 +6,21 @@ import storeInIPFS from '../utils/store_in_ipfs';
 import { logger } from '../utils/logger';
 import CustomError from '../exceptions/custom_error';
 
+export interface EventResponse {
+  id: string;
+  name: string;
+  numberOfMember: number;
+  ItemNFTImageHash: string;
+  adminUserId: string;
+  itemEventId: string;
+}
+
+const sanitizeEventResponse = (event: IEvent): EventResponse => {
+  const _event: any = event;
+  delete _event._id;
+  return _event;
+};
+
 export const createEvent = async (request: IEvent) => {
   try {
     const eventId = uuidv4();
@@ -70,7 +85,8 @@ export const updateEvent = async (eventId: string, itemEventId: string) => {
 export const getEventById = async (eventId: string) => {
   try {
     const event = await Event.findOne({ id: eventId });
-    return event;
+    if (!event) throw new CustomError('Event not found', 404, undefined);
+    return sanitizeEventResponse(event);
   } catch (error: any) {
     if (error instanceof CustomError) throw error;
     logger.error('Error in logging the user : ', error);
@@ -81,7 +97,8 @@ export const getEventById = async (eventId: string) => {
 export const getAllEvent = async () => {
   try {
     const events = await Event.find({});
-    return events;
+    const sanitizedEvents = events.map((eve) => sanitizeEventResponse(eve));
+    return sanitizedEvents;
   } catch (error: any) {
     if (error instanceof CustomError) throw error;
     logger.error('Error in logging the user : ', error);

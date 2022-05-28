@@ -13,7 +13,7 @@ import {
 } from '../middleware/validate_jwt.middleware';
 
 const userRouter = express.Router();
-  export { userRouter as default };
+export { userRouter as default };
 
 userRouter.post(
   '/',
