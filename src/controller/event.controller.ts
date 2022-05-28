@@ -54,7 +54,7 @@ export const createEvent = async (request: IEvent) => {
   } catch (error: any) {
     if (error instanceof CustomError) throw error;
     logger.error('Error in logging the user : ', error);
-    throw new CustomError('Oops! something went wrong', 401, undefined, error);
+    throw new CustomError('Oops! something went wrong', 500, undefined, error);
   }
 };
 export const updateEvent = async (eventId: string, itemEventId: string) => {
@@ -63,7 +63,7 @@ export const updateEvent = async (eventId: string, itemEventId: string) => {
   } catch (error: any) {
     if (error instanceof CustomError) throw error;
     logger.error('Error in logging the user : ', error);
-    throw new CustomError('Oops! something went wrong', 401, undefined, error);
+    throw new CustomError('Oops! something went wrong', 500, undefined, error);
   }
 };
 
@@ -74,7 +74,7 @@ export const getEventById = async (eventId: string) => {
   } catch (error: any) {
     if (error instanceof CustomError) throw error;
     logger.error('Error in logging the user : ', error);
-    throw new CustomError('Oops! something went wrong', 401, undefined, error);
+    throw new CustomError('Oops! something went wrong', 500, undefined, error);
   }
 };
 
@@ -85,6 +85,6 @@ export const getAllEvent = async () => {
   } catch (error: any) {
     if (error instanceof CustomError) throw error;
     logger.error('Error in logging the user : ', error);
-    throw new CustomError('Oops! something went wrong', 401, undefined, error);
+    throw new CustomError('Oops! something went wrong', 500, undefined, error);
   }
 };
