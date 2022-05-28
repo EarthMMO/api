@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
 import User, { NFT } from '../services/mongodb/users.schema';
+import Event, { IEvent } from '../services/mongodb/events.schema';
 import { createToken } from '../utils/jwt';
 import { generateSecret } from '../utils/secret';
 import storeInIPFS from '../utils/store_in_ipfs';
@@ -164,11 +165,23 @@ export const updateUser = async (NFT: NFT, userId: string) => {
   }
 };
 
+const fetchEventNFTHashes = (NTFs: NFT[]) => {
+  const promises = NTFs.map(async (nft: NFT) => {
+    const event = (await Event.findOne({
+      itemEventId: nft.eventId,
+    })) as IEvent;
+    return event.ItemNFTImageHash as any;
+  });
+  return Promise.all(promises);
+};
+
 export const getUser = async (userId: string) => {
   try {
     const user = await User.findOne({ id: userId });
-    if (!user) throw new CustomError('User not found', 400, '400', userId);
 
+    if (!user) throw new CustomError('User not found', 400, '400', userId);
+    const eventImageHashed = await fetchEventNFTHashes(user.NFTs);
+    user.NFTs = eventImageHashed;
     return user;
   } catch (error: any) {
     logger.error('Error in updating the user : ', error);

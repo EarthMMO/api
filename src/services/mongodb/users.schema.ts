@@ -1,9 +1,10 @@
 import { Schema, model } from 'mongoose';
 
 export interface NFT {
-  name: string;
-  contractAddress: string;
-  tokenId: string;
+  name?: string;
+  contractAddress?: string;
+  tokenId?: string;
+  eventId: string;
 }
 
 export interface IUser {
@@ -63,6 +64,7 @@ const UserSchema = new Schema<IUser>({
       name: { type: String },
       contractAddress: { type: String },
       tokenId: { type: String },
+      eventId: { type: String },
     },
   ],
   ethereumAddress: {

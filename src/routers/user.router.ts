@@ -105,14 +105,22 @@ userRouter.patch(
   validateJWT, // populates req.user by validating JWT
   [
     check('NFT.name')
+      .optional()
       .isString()
       .isLength({ min: 3, max: 80 })
       .withMessage('Invalid NFT.name'),
     check('NFT.contractAddress')
+      .optional()
       .isString()
       .isLength({ min: 3, max: 80 })
       .withMessage('Invalid signature'),
     check('NFT.tokenId')
+      .optional()
+      .isString()
+      .isLength({ min: 3, max: 80 })
+      .withMessage('Invalid NFT.contractAddress'),
+    check('NFT.eventId')
+      .optional()
       .isString()
       .isLength({ min: 3, max: 80 })
       .withMessage('Invalid NFT.contractAddress'),
