@@ -167,8 +167,9 @@ export const updateUser = async (NFT: NFT, userId: string) => {
 
 const fetchEventNFTHashes = (NTFs: NFT[]) => {
   const promises = NTFs.map(async (nft: NFT) => {
-    const event = (await Event.findOne({
-      itemEventId: nft.eventId,
+  console.log({ id: nft.eventId });
+  const event = (await Event.findOne({
+     id: nft.eventId,
     })) as IEvent;
     return event.ItemNFTImageHash as any;
   });
@@ -179,10 +180,12 @@ export const getUser = async (userId: string) => {
   try {
     const user = await User.findOne({ id: userId });
 
-    if (!user) throw new CustomError('User not found', 400, '400', userId);
-    const eventImageHashed = await fetchEventNFTHashes(user.NFTs);
-    user.NFTs = eventImageHashed;
-    return user;
+	  if (!user) throw new CustomError('User not found', 400, '400', userId);
+	  const eventImageHashed = await fetchEventNFTHashes(user.NFTs);
+	  console.log(user,{...user.toObject()})
+    const _users = { ...user.toObject(), NFTs: eventImageHashed };
+
+    return _users;   
   } catch (error: any) {
     logger.error('Error in updating the user : ', error);
     if (error instanceof CustomError) throw error;

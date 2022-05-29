@@ -18,9 +18,11 @@ export interface JWTContent {
 
 export const createToken = async (body: JWTContent, secret: string) => {
   return new Promise((resolve, reject) => {
-    try {
+  try {
+  console.log("jwt : ",+(process.env.JWT_EXPIRY as string))
       var token = jwt.sign({ ...body }, secret, {
-        expiresIn: process.env.JWT_EXPIRY,
+        expiresIn: +(process.env.JWT_EXPIRY as string),
+
         issuer: process.env.JWT_ISSUER,
         audience: process.env.JWT_AUDIENCE,
       });
