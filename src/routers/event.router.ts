@@ -55,6 +55,8 @@ userRouter.post(
       const userDetails = await createEvent({
         name: request.body.name,
         description: request.body.description,
+        itemName: request.body.itemName,
+        itemDescription: request.body.itemDescription,
         website: request.body.website,
         numberOfMember: request.body.numberOfMember,
         fileName: request?.file?.filename,

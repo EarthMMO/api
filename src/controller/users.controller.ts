@@ -3,8 +3,8 @@ const ether = require('ethers');
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
-import User, { NFT } from '../services/mongodb/users.schema';
-import Event, { IEvent } from '../services/mongodb/events.schema';
+import User, { NFT } from '../services/mongodb/user.schema';
+import Event, { IEvent } from '../services/mongodb/event.schema';
 import { createToken } from '../utils/jwt';
 import { generateSecret } from '../utils/secret';
 import storeInIPFS from '../utils/store_in_ipfs';
@@ -167,9 +167,9 @@ export const updateUser = async (NFT: NFT, userId: string) => {
 
 const fetchEventNFTHashes = (NTFs: NFT[]) => {
   const promises = NTFs.map(async (nft: NFT) => {
-  console.log({ id: nft.eventId });
-  const event = (await Event.findOne({
-     id: nft.eventId,
+    console.log({ id: nft.eventId });
+    const event = (await Event.findOne({
+      id: nft.eventId,
     })) as IEvent;
     return event.ItemNFTImageHash as any;
   });
@@ -180,12 +180,12 @@ export const getUser = async (userId: string) => {
   try {
     const user = await User.findOne({ id: userId });
 
-	  if (!user) throw new CustomError('User not found', 400, '400', userId);
-	  const eventImageHashed = await fetchEventNFTHashes(user.NFTs);
-	  console.log(user,{...user.toObject()})
+    if (!user) throw new CustomError('User not found', 400, '400', userId);
+    const eventImageHashed = await fetchEventNFTHashes(user.NFTs);
+    console.log(user, { ...user.toObject() });
     const _users = { ...user.toObject(), NFTs: eventImageHashed };
 
-    return _users;   
+    return _users;
   } catch (error: any) {
     logger.error('Error in updating the user : ', error);
     if (error instanceof CustomError) throw error;
@@ -197,6 +197,7 @@ export const getUser = async (userId: string) => {
     );
   }
 };
+
 export interface createUserRequest {
   firstName: string;
   lastName?: string;

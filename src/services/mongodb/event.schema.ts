@@ -7,6 +7,8 @@ export interface IEvent {
   description?: string;
   numberOfMember: number;
   itemEventId?: string;
+  itemName?: string;
+  itemDescription?: string;
   fileName?: string;
   ItemNFTImageHash?: string;
   adminUserId?: string;
@@ -36,6 +38,12 @@ const EventSchema = new Schema<IEvent>({
     required: true,
   },
   itemEventId: {
+    type: String,
+  },
+  itemName: {
+    type: String,
+  },
+  itemDescription: {
     type: String,
   },
   fileName: {

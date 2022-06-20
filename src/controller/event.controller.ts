@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
-import Event, { IEvent } from '../services/mongodb/events.schema';
+import Event, { IEvent } from '../services/mongodb/event.schema';
 import storeInIPFS from '../utils/store_in_ipfs';
 import { logger } from '../utils/logger';
 import CustomError from '../exceptions/custom_error';
@@ -27,6 +27,8 @@ export const createEvent = async (request: IEvent) => {
     const {
       name,
       description,
+      itemName,
+      itemDescription,
       website,
       numberOfMember,
       fileName,
@@ -48,6 +50,8 @@ export const createEvent = async (request: IEvent) => {
       id: eventId,
       name,
       description,
+      itemName,
+      itemDescription,
       website,
       numberOfMember,
       ItemNFTImageHash,
@@ -57,6 +61,8 @@ export const createEvent = async (request: IEvent) => {
       id: eventId,
       name,
       description,
+      itemName,
+      itemDescription,
       website,
       numberOfMember: Number(numberOfMember),
       ItemNFTImageHash,
