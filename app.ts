@@ -7,6 +7,7 @@ import defaultLogger, { logger } from './src/utils/logger';
 import { connect } from './src/utils/db_connect';
 import userRouter from './src/routers/user.router';
 import eventRouter from './src/routers/event.router';
+import groupRouter from './src/routers/group.router';
 import errorMiddleware from './src/middleware/error.middleware';
 const bip39 = require('bip39');
 
@@ -56,6 +57,7 @@ app.listen(port, async () => {
   const CORE_API_PATH_PREFIX = `/api/v${process.env.SERVER_VERSION as string}`;
   app.use(`${CORE_API_PATH_PREFIX}/user`, userRouter);
   app.use(`${CORE_API_PATH_PREFIX}/event`, eventRouter);
+  app.use(`${CORE_API_PATH_PREFIX}/group`, groupRouter);
   app.use(errorMiddleware);
 
   logger.info(`Server running on port ${process.env.SERVER_ADDRESS}:${port}`);

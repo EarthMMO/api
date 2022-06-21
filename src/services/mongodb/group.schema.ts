@@ -3,11 +3,10 @@ import { Schema, model } from 'mongoose';
 export interface IGroup {
   id?: string;
   created: Date;
-  adminUserId?: string;
+  adminId?: string;
   name: string;
   description?: string;
   members: string[];
-  minGroupSize: number;
   maxGroupSize: number;
 }
 
@@ -17,7 +16,7 @@ const GroupSchema = new Schema<IGroup>({
     unique: true,
   },
   created: { type: Date, default: Date.now },
-  adminUserId: {
+  adminId: {
     type: String,
     required: true,
   },
@@ -29,7 +28,6 @@ const GroupSchema = new Schema<IGroup>({
     type: String,
   },
   members: [String],
-  minGroupSize: Number,
   maxGroupSize: Number,
 });
 

@@ -5,7 +5,7 @@ import {
   getUser,
   loginUser,
   updateUser,
-} from '../controller/users.controller';
+} from '../controller/user.controller';
 import CustomError from '../exceptions/custom_error';
 import {
   validateJWT,

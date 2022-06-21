@@ -46,6 +46,7 @@ export const createEvent = async (request: IEvent) => {
 
     // all the fileData to IPFS
     const ItemNFTImageHash = await storeInIPFS(fileBuffer);
+
     logger.debug({
       id: eventId,
       name,
@@ -57,6 +58,7 @@ export const createEvent = async (request: IEvent) => {
       ItemNFTImageHash,
       adminUserId,
     });
+
     await Event.create({
       id: eventId,
       name,
@@ -68,6 +70,7 @@ export const createEvent = async (request: IEvent) => {
       ItemNFTImageHash,
       adminUserId,
     });
+
     fs.unlinkSync(
       path.join(`${__dirname}/../../../static`, fileName as string)
     );
@@ -78,6 +81,7 @@ export const createEvent = async (request: IEvent) => {
     throw new CustomError('Oops! something went wrong', 500, undefined, error);
   }
 };
+
 export const updateEvent = async (eventId: string, itemEventId: string) => {
   try {
     await Event.updateOne({ id: eventId }, { itemEventId });

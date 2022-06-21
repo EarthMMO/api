@@ -1,50 +1,30 @@
-const multer = require('multer');
 import express, { NextFunction, Request, Response } from 'express';
 import { check, validationResult } from 'express-validator';
 import CustomError from '../exceptions/custom_error';
 import {
-  createEvent,
-  getAllEvent,
-  getEventById,
-  updateEvent,
-} from '../controller/event.controller';
+  createGroup,
+  getAllGroups,
+  getGroupById,
+  updateGroup,
+} from '../controller/group.controller';
 import {
   validateJWT,
   UserRequest,
 } from '../middleware/validate_jwt.middleware';
 
-const storage = multer.diskStorage({
-  destination: (req: Request, file: any, cb: any) => {
-    cb(null, 'static/');
-  },
-  filename: (req: Request, file: any, cb: any) => {
-    let parts = file.originalname.split('.');
-    let ext = parts.pop();
-    let name = parts.join('.');
-    parts = name.split(' ').join('.');
-    cb(null, +Date.now() + '.' + ext);
-  },
-});
+const groupRouter = express.Router();
+export { groupRouter as default };
 
-const upload = multer({ storage: storage });
-
-const eventRouter = express.Router();
-export { eventRouter as default };
-
-eventRouter.post(
+groupRouter.post(
   '/',
   validateJWT,
-  upload.single('eventImage'),
-  [
-    check('name').isString().withMessage('Invalid numberOfMember'),
-    check('numberOfMember').isInt().withMessage('Invalid numberOfMember'),
-  ],
-
+  [check('name').isString().withMessage('Invalid name')],
   async (
     request: UserRequest & { file?: any },
     response: Response,
     next: NextFunction
   ) => {
+    console.log('WE ARE IN THE GROUP ROUTER');
     try {
       const errors = validationResult(request);
       if (!errors.isEmpty()) {
@@ -52,15 +32,11 @@ eventRouter.post(
           new CustomError('Invalid fields', 400, '00002', errors.array())
         );
       }
-      const userDetails = await createEvent({
+      const userDetails = await createGroup({
+        adminId: request.userDetails?.id as string,
         name: request.body.name,
         description: request.body.description,
-        itemName: request.body.itemName,
-        itemDescription: request.body.itemDescription,
-        website: request.body.website,
-        numberOfMember: request.body.numberOfMember,
-        fileName: request?.file?.filename,
-        adminUserId: request.userDetails?.id as string,
+        maxGroupSize: request.body.maxGroupSize,
       });
       response.status(200).send(userDetails);
     } catch (e: any) {
@@ -71,13 +47,10 @@ eventRouter.post(
   }
 );
 
-eventRouter.patch(
+groupRouter.patch(
   '/',
   validateJWT,
-  [
-    check('eventId').isString().withMessage('Invalid eventId'),
-    check('itemEventId').isString().withMessage('Invalid itemEventId'),
-  ],
+  [check('groupId').isString().withMessage('Invalid groupId')],
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       const errors = validationResult(request);
@@ -86,7 +59,7 @@ eventRouter.patch(
           new CustomError('Invalid fields', 400, '00002', errors.array())
         );
       }
-      await updateEvent(request.body.eventId, request.body.itemEventId);
+      await updateGroup(request.body.userId, request.body.groupId, response);
       response.status(200).send({});
     } catch (e: any) {
       console.error('Error');
@@ -96,13 +69,13 @@ eventRouter.patch(
   }
 );
 
-eventRouter.get(
+groupRouter.get(
   '/',
   validateJWT,
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const event = await getAllEvent();
-      return response.status(200).send(event);
+      const groups = await getAllGroups();
+      return response.status(200).send(groups);
     } catch (e: any) {
       console.error('Error');
       if (e instanceof CustomError) return next(e);
@@ -111,15 +84,16 @@ eventRouter.get(
   }
 );
 
-eventRouter.get(
-  '/:eventId',
+groupRouter.get(
+  '/:groupId',
   validateJWT,
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      if (!request.params.eventId)
-        return response.status(400).send({ message: 'Invalid eventId' });
-      const event = await getEventById(request.params.eventId);
-      return event;
+      if (!request.params.groupId) {
+        return response.status(400).send({ message: 'Invalid groupId' });
+      }
+      const group = await getGroupById(request.params.groupId);
+      return group;
     } catch (e: any) {
       console.error('Error');
       if (e instanceof CustomError) return next(e);
