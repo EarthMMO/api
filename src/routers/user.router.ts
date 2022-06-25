@@ -1,16 +1,36 @@
+// @ts-nocheck
+import * as fs from 'fs';
 import express, { NextFunction, Request, Response } from 'express';
+import multer from 'multer';
 import { check, validationResult } from 'express-validator';
+
+import CustomError from '../exceptions/custom_error';
+import UserModel from '../services/mongodb/user.schema';
+import {
+  UserRequest,
+  validateJWT,
+} from '../middleware/validate_jwt.middleware';
 import {
   createUser,
   getUser,
   loginUser,
   updateUser,
 } from '../controller/user.controller';
-import CustomError from '../exceptions/custom_error';
-import {
-  validateJWT,
-  UserRequest,
-} from '../middleware/validate_jwt.middleware';
+
+const storage = multer.diskStorage({
+  destination: function (req, file, callback) {
+    callback(null, 'static/uploads');
+  },
+  filename: function (req, file, callback) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    callback(null, file.originalname + '-' + uniqueSuffix + '.png');
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fieldSize: 10 * 1024 * 1024 },
+}); //10MB
 
 const userRouter = express.Router();
 export { userRouter as default };
@@ -155,3 +175,30 @@ userRouter.get(
     res.status(200).send(user);
   }
 );
+
+userRouter.patch(
+  '/:userId/upload',
+  validateJWT,
+  upload.single('image'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.params.userId;
+      const user = await getUser(userId);
+      await UserModel.updateOne(
+        { id: userId },
+        { profileImagePath: req.file.path }
+      );
+      res.status(200).send(user);
+    } catch (error) {
+      console.log('ERROR', error);
+    }
+  }
+);
+
+userRouter.use(function (err, req, res, next) {
+  if (err) {
+    console.log('Error', err);
+  } else {
+    console.log('404');
+  }
+});

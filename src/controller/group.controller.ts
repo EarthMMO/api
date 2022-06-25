@@ -1,7 +1,6 @@
 import CustomError from '../exceptions/custom_error';
 import GroupModel, { IGroup } from '../services/mongodb/group.schema';
 import UserModel from '../services/mongodb/user.schema';
-import { Response } from 'express';
 import { logger } from '../utils/logger';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -24,50 +23,38 @@ const sanitizeGroupResponse = (group: IGroup): GroupResponse => {
 export const createGroup = async (request: any) => {
   try {
     const id = uuidv4();
-    const { adminId, name, description, maxGroupSize } = request;
+    const { adminId, description, maxGroupSize, name } = request;
+    const admin = await UserModel.findOne({ id: adminId });
 
     logger.debug({
-      id,
       adminId,
-      name,
       description,
+      id,
       maxGroupSize,
+      members: [
+        {
+          id: adminId,
+          profileImagePath: admin?.profileImagePath,
+        },
+      ],
+      name,
     });
 
     await GroupModel.create({
-      id,
       adminId,
-      name,
       description,
+      id,
       maxGroupSize,
+      members: [
+        {
+          id: adminId,
+          profileImagePath: admin?.profileImagePath,
+        },
+      ],
+      name,
     });
 
     return { id };
-  } catch (error: any) {
-    if (error instanceof CustomError) throw error;
-    logger.error('Error in logging the group: ', error);
-    throw new CustomError('Oops! something went wrong', 500, undefined, error);
-  }
-};
-
-export const updateGroup = async (
-  userId: string,
-  groupId: string,
-  response: Response
-) => {
-  try {
-    const user = await UserModel.findOne({ userId });
-    const group = await GroupModel.findOne({ groupId });
-
-    if (!user || !group) {
-      response.status(400).send('Invalid userId or groupId');
-    }
-    if (+group?.maxGroupSize! >= group?.members.length!) {
-      response.status(400).send('Can not add more participants!');
-    }
-
-    await GroupModel.updateOne({ groupId }, { $push: { members: userId } });
-    response.status(200).send({});
   } catch (error: any) {
     if (error instanceof CustomError) throw error;
     logger.error('Error in logging the group: ', error);

@@ -5,12 +5,13 @@ import {
   createGroup,
   getAllGroups,
   getGroupById,
-  updateGroup,
 } from '../controller/group.controller';
 import {
   validateJWT,
   UserRequest,
 } from '../middleware/validate_jwt.middleware';
+import GroupModel from '../services/mongodb/group.schema';
+import UserModel from '../services/mongodb/user.schema';
 
 const groupRouter = express.Router();
 export { groupRouter as default };
@@ -18,13 +19,7 @@ export { groupRouter as default };
 groupRouter.post(
   '/',
   validateJWT,
-  [check('name').isString().withMessage('Invalid name')],
-  async (
-    request: UserRequest & { file?: any },
-    response: Response,
-    next: NextFunction
-  ) => {
-    console.log('WE ARE IN THE GROUP ROUTER');
+  async (request: UserRequest, response: Response, next: NextFunction) => {
     try {
       const errors = validationResult(request);
       if (!errors.isEmpty()) {
@@ -39,28 +34,6 @@ groupRouter.post(
         maxGroupSize: request.body.maxGroupSize,
       });
       response.status(200).send(userDetails);
-    } catch (e: any) {
-      console.error('Error');
-      if (e instanceof CustomError) return next(e);
-      return next(new CustomError(undefined, undefined, undefined, e));
-    }
-  }
-);
-
-groupRouter.patch(
-  '/',
-  validateJWT,
-  [check('groupId').isString().withMessage('Invalid groupId')],
-  async (request: Request, response: Response, next: NextFunction) => {
-    try {
-      const errors = validationResult(request);
-      if (!errors.isEmpty()) {
-        return next(
-          new CustomError('Invalid fields', 400, '00002', errors.array())
-        );
-      }
-      await updateGroup(request.body.userId, request.body.groupId, response);
-      response.status(200).send({});
     } catch (e: any) {
       console.error('Error');
       if (e instanceof CustomError) return next(e);
@@ -96,6 +69,74 @@ groupRouter.get(
       return group;
     } catch (e: any) {
       console.error('Error');
+      if (e instanceof CustomError) return next(e);
+      return next(new CustomError(undefined, undefined, undefined, e));
+    }
+  }
+);
+
+groupRouter.patch(
+  '/:groupId/:action',
+  validateJWT,
+  [check('groupId').isString().withMessage('Invalid groupId')],
+  async (request: Request, response: Response, next: NextFunction) => {
+    try {
+      const errors = validationResult(request);
+      if (!errors.isEmpty()) {
+        return next(
+          new CustomError('Invalid fields', 400, '00002', errors.array())
+        );
+      }
+
+      const userId = request.body.userId;
+      const groupId = request.params.groupId;
+      const action = request.params.action;
+
+      const user = await UserModel.findOne({ id: userId });
+      let group = await GroupModel.findOne({ id: groupId });
+
+      if (!user || !group) {
+        console.log("ONE OF THEM ISN'T FOUND");
+        return response.status(400).send('Invalid userId or groupId');
+      }
+      if (group?.members.length! + 1 > +group?.maxGroupSize!) {
+        console.log('GROUP IS FULL');
+        return response.status(400).send('Can not add more participants!');
+      }
+
+      console.log('USER PROFILE', user);
+      if (action === 'join') {
+        group = await GroupModel.findOneAndUpdate(
+          { id: groupId },
+          {
+            $push: {
+              members: { id: userId, profileImagePath: user.profileImagePath },
+            },
+          },
+          {
+            new: true,
+          }
+        );
+      } else if (action === 'leave') {
+        group = await GroupModel.findOneAndUpdate(
+          { id: groupId },
+          {
+            $pull: {
+              members: {
+                id: userId,
+              },
+            },
+          },
+          {
+            new: true,
+          }
+        );
+      }
+
+      console.log('GROUP', group);
+      return response.status(200).send(group);
+    } catch (e: any) {
+      console.error('Error', e);
       if (e instanceof CustomError) return next(e);
       return next(new CustomError(undefined, undefined, undefined, e));
     }

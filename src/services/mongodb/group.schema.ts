@@ -6,7 +6,7 @@ export interface IGroup {
   adminId?: string;
   name: string;
   description?: string;
-  members: string[];
+  members: { id: string; profileImagePath?: string }[];
   maxGroupSize: number;
 }
 
@@ -27,7 +27,16 @@ const GroupSchema = new Schema<IGroup>({
   description: {
     type: String,
   },
-  members: [String],
+  members: [
+    {
+      id: {
+        type: String,
+      },
+      profileImagePath: {
+        type: String,
+      },
+    },
+  ],
   maxGroupSize: Number,
 });
 

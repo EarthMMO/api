@@ -13,6 +13,7 @@ export interface IUser {
   lastName: string;
   email?: string;
   twitterHandle?: string;
+  profileImagePath?: string;
   profileNFTIPFSHash?: string;
   ethereumAddress: string;
   publicKey: string;
@@ -48,11 +49,13 @@ const UserSchema = new Schema<IUser>({
     minlength: 3,
     maxlength: 50,
   },
-
   email: {
     type: String,
     minlength: 3,
     maxlength: 100,
+  },
+  profileImagePath: {
+    type: String,
   },
   profileNFTIPFSHash: {
     type: String,
@@ -78,7 +81,6 @@ const UserSchema = new Schema<IUser>({
     type: String,
     maxlength: 350,
   },
-
   derivationSuffix: {
     type: Number,
     unique: true,
