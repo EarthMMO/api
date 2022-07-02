@@ -1,15 +1,15 @@
 // import ether from 'ethers';
-const ether = require('ethers');
-import { v4 as uuidv4 } from 'uuid';
-import fs from 'fs';
-import path from 'path';
-import User, { NFT } from '../services/mongodb/user.schema';
-import Event, { IEvent } from '../services/mongodb/event.schema';
-import { createToken } from '../utils/jwt';
-import { generateSecret } from '../utils/secret';
-import storeInIPFS from '../utils/store_in_ipfs';
-import CustomError from '../exceptions/custom_error';
-import { logger } from '../utils/logger';
+const ether = require("ethers");
+import { v4 as uuidv4 } from "uuid";
+import fs from "fs";
+import path from "path";
+import User, { NFT } from "../models/user.schema";
+import Event, { IEvent } from "../models/event.schema";
+import { createToken } from "../utils/jwt";
+import { generateSecret } from "../utils/secret";
+import storeInIPFS from "../utils/store_in_ipfs";
+import CustomError from "../exceptions/custom_error";
+import { logger } from "../utils/logger";
 
 /**
  * This function receives the string binary, store it in the IPFS and return path
@@ -43,17 +43,17 @@ export const createUser = async (userRequest: createUserRequest) => {
     }
     // verify the signature
     const addressOfTheSigner = ether.utils.verifyMessage(
-      Buffer.from('hello'),
+      Buffer.from("hello"),
       signature as string
     );
     if (addressOfTheSigner !== ethereumAddress)
-      throw new CustomError('Invalid signature', 400, '400', ethereumAddress);
+      throw new CustomError("Invalid signature", 400, "400", ethereumAddress);
 
     //   ====  store the image in the IPFS  ===
 
     //read profile pic
     const userNFTFile = fs.readFileSync(
-      path.join(`${__dirname}/../../../static`, 'profile.jpg')
+      path.join(`${__dirname}/../../../static`, "profile.jpg")
     );
 
     // extract binary data from the file read
@@ -64,7 +64,7 @@ export const createUser = async (userRequest: createUserRequest) => {
 
     const bodyNFTMetaData = {
       image: `${process.env.IPFS_FILE_PATH_UR}/${profileImagePath}`,
-      name: 'EarthMMO-Profile body',
+      name: "EarthMMO-Profile body",
     };
 
     // store the metaData in IPFS
@@ -104,11 +104,11 @@ export const createUser = async (userRequest: createUserRequest) => {
     };
   } catch (error: any) {
     if (error instanceof CustomError) throw error;
-    logger.error('Error in creating the user : ', error);
+    logger.error("Error in creating the user : ", error);
     throw new CustomError(
-      'Oops! something went wrong',
+      "Oops! something went wrong",
       400,
-      'undefined, error'
+      "undefined, error"
     );
   }
 };
@@ -118,19 +118,19 @@ export const loginUser = async (ethereumAddress: string, signature: string) => {
     // verify the signature
 
     const addressOfTheSigner = ether.utils.verifyMessage(
-      Buffer.from('hello'),
+      Buffer.from("hello"),
       signature as string
     );
 
     if (addressOfTheSigner !== ethereumAddress)
-      throw new CustomError('Invalid signature', 401, '400', ethereumAddress);
+      throw new CustomError("Invalid signature", 401, "400", ethereumAddress);
 
     const userDetails = await User.findOne(
       { ethereumAddress },
       { derivationSuffix: 1, userId: 1, firstName: 1, id: 1 }
     );
     if (!userDetails)
-      throw new CustomError('Please signup', 400, '400', ethereumAddress);
+      throw new CustomError("Please signup", 400, "400", ethereumAddress);
     const { id, firstName, derivationSuffix } = userDetails;
     const secret = generateSecret(derivationSuffix as number);
 
@@ -143,18 +143,18 @@ export const loginUser = async (ethereumAddress: string, signature: string) => {
     return { jwt, userId: id };
   } catch (error: any) {
     if (error instanceof CustomError) throw error;
-    logger.error('Error in loggingin the user : ', error);
-    throw new CustomError('Oops! something went wrong', 401, undefined, error);
+    logger.error("Error in loggingin the user : ", error);
+    throw new CustomError("Oops! something went wrong", 401, undefined, error);
   }
 };
 
 export const updateUser = async (NFT: NFT, userId: string) => {
   try {
     const user = await User.findOne({ id: userId });
-    if (!user) throw new CustomError('User not found', 400, '400', userId);
+    if (!user) throw new CustomError("User not found", 400, "400", userId);
     await User.updateOne({ id: userId }, { $push: { NFTs: NFT } });
   } catch (error: any) {
-    logger.error('Error in updating the user : ', error);
+    logger.error("Error in updating the user : ", error);
     if (error instanceof CustomError) throw error;
     throw new CustomError(
       undefined,
@@ -180,14 +180,14 @@ export const getUser = async (userId: string) => {
   try {
     const user = await User.findOne({ id: userId });
 
-    if (!user) throw new CustomError('User not found', 400, '400', userId);
+    if (!user) throw new CustomError("User not found", 400, "400", userId);
     const eventImageHashed = await fetchEventNFTHashes(user.NFTs);
     console.log(user, { ...user.toObject() });
     const _users = { ...user.toObject(), NFTs: eventImageHashed };
 
     return _users;
   } catch (error: any) {
-    logger.error('Error in updating the user : ', error);
+    logger.error("Error in updating the user : ", error);
     if (error instanceof CustomError) throw error;
     throw new CustomError(
       undefined,

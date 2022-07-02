@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model } from "mongoose";
 
 export interface IGroup {
   id?: string;
@@ -40,6 +40,6 @@ const GroupSchema = new Schema<IGroup>({
   maxGroupSize: Number,
 });
 
-const GroupModel = model<IGroup>('group', GroupSchema);
+const GroupModel = model<IGroup>("group", GroupSchema);
 
 export default GroupModel;

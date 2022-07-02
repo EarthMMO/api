@@ -1,28 +1,28 @@
-const multer = require('multer');
-import express, { NextFunction, Request, Response } from 'express';
-import { check, validationResult } from 'express-validator';
-import CustomError from '../exceptions/custom_error';
+const multer = require("multer");
+import express, { NextFunction, Request, Response } from "express";
+import { check, validationResult } from "express-validator";
+import CustomError from "../exceptions/custom_error";
 import {
   createEvent,
   getAllEvent,
   getEventById,
   updateEvent,
-} from '../controller/event.controller';
+} from "../controllers/event.controller";
 import {
   validateJWT,
   UserRequest,
-} from '../middleware/validate_jwt.middleware';
+} from "../middlewares/validate_jwt.middleware";
 
 const storage = multer.diskStorage({
   destination: (req: Request, file: any, cb: any) => {
-    cb(null, 'static/');
+    cb(null, "static/");
   },
   filename: (req: Request, file: any, cb: any) => {
-    let parts = file.originalname.split('.');
+    let parts = file.originalname.split(".");
     let ext = parts.pop();
-    let name = parts.join('.');
-    parts = name.split(' ').join('.');
-    cb(null, +Date.now() + '.' + ext);
+    let name = parts.join(".");
+    parts = name.split(" ").join(".");
+    cb(null, +Date.now() + "." + ext);
   },
 });
 
@@ -32,12 +32,12 @@ const eventRouter = express.Router();
 export { eventRouter as default };
 
 eventRouter.post(
-  '/',
+  "/",
   validateJWT,
-  upload.single('eventImage'),
+  upload.single("eventImage"),
   [
-    check('name').isString().withMessage('Invalid numberOfMember'),
-    check('numberOfMember').isInt().withMessage('Invalid numberOfMember'),
+    check("name").isString().withMessage("Invalid numberOfMember"),
+    check("numberOfMember").isInt().withMessage("Invalid numberOfMember"),
   ],
 
   async (
@@ -49,7 +49,7 @@ eventRouter.post(
       const errors = validationResult(request);
       if (!errors.isEmpty()) {
         return next(
-          new CustomError('Invalid fields', 400, '00002', errors.array())
+          new CustomError("Invalid fields", 400, "00002", errors.array())
         );
       }
       const userDetails = await createEvent({
@@ -64,7 +64,7 @@ eventRouter.post(
       });
       response.status(200).send(userDetails);
     } catch (e: any) {
-      console.error('Error');
+      console.error("Error");
       if (e instanceof CustomError) return next(e);
       return next(new CustomError(undefined, undefined, undefined, e));
     }
@@ -72,24 +72,24 @@ eventRouter.post(
 );
 
 eventRouter.patch(
-  '/',
+  "/",
   validateJWT,
   [
-    check('eventId').isString().withMessage('Invalid eventId'),
-    check('itemEventId').isString().withMessage('Invalid itemEventId'),
+    check("eventId").isString().withMessage("Invalid eventId"),
+    check("itemEventId").isString().withMessage("Invalid itemEventId"),
   ],
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       const errors = validationResult(request);
       if (!errors.isEmpty()) {
         return next(
-          new CustomError('Invalid fields', 400, '00002', errors.array())
+          new CustomError("Invalid fields", 400, "00002", errors.array())
         );
       }
       await updateEvent(request.body.eventId, request.body.itemEventId);
       response.status(200).send({});
     } catch (e: any) {
-      console.error('Error');
+      console.error("Error");
       if (e instanceof CustomError) return next(e);
       return next(new CustomError(undefined, undefined, undefined, e));
     }
@@ -97,14 +97,14 @@ eventRouter.patch(
 );
 
 eventRouter.get(
-  '/',
+  "/",
   validateJWT,
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       const event = await getAllEvent();
       return response.status(200).send(event);
     } catch (e: any) {
-      console.error('Error');
+      console.error("Error");
       if (e instanceof CustomError) return next(e);
       return next(new CustomError(undefined, undefined, undefined, e));
     }
@@ -112,16 +112,16 @@ eventRouter.get(
 );
 
 eventRouter.get(
-  '/:eventId',
+  "/:eventId",
   validateJWT,
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       if (!request.params.eventId)
-        return response.status(400).send({ message: 'Invalid eventId' });
+        return response.status(400).send({ message: "Invalid eventId" });
       const event = await getEventById(request.params.eventId);
       return event;
     } catch (e: any) {
-      console.error('Error');
+      console.error("Error");
       if (e instanceof CustomError) return next(e);
       return next(new CustomError(undefined, undefined, undefined, e));
     }

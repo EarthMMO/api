@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model } from "mongoose";
 
 export interface IEvent {
   id?: string;
@@ -55,6 +55,6 @@ const EventSchema = new Schema<IEvent>({
   },
 });
 
-const UserModel = model<IEvent>('event', EventSchema);
+const UserModel = model<IEvent>("event", EventSchema);
 
 export default UserModel;

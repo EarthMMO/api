@@ -1,29 +1,29 @@
 // @ts-nocheck
-import * as fs from 'fs';
-import express, { NextFunction, Request, Response } from 'express';
-import multer from 'multer';
-import { check, validationResult } from 'express-validator';
+import * as fs from "fs";
+import express, { NextFunction, Request, Response } from "express";
+import multer from "multer";
+import { check, validationResult } from "express-validator";
 
-import CustomError from '../exceptions/custom_error';
-import UserModel from '../services/mongodb/user.schema';
+import CustomError from "../exceptions/custom_error";
+import UserModel from "../models/user.schema";
 import {
   UserRequest,
   validateJWT,
-} from '../middleware/validate_jwt.middleware';
+} from "../middlewares/validate_jwt.middleware";
 import {
   createUser,
   getUser,
   loginUser,
   updateUser,
-} from '../controller/user.controller';
+} from "../controllers/user.controller";
 
 const storage = multer.diskStorage({
   destination: function (req, file, callback) {
-    callback(null, 'static/uploads');
+    callback(null, "static/uploads");
   },
   filename: function (req, file, callback) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    callback(null, file.originalname + '-' + uniqueSuffix + '.png');
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    callback(null, file.originalname + "-" + uniqueSuffix + ".png");
   },
 });
 
@@ -36,39 +36,39 @@ const userRouter = express.Router();
 export { userRouter as default };
 
 userRouter.post(
-  '/',
+  "/",
   [
-    check('firstName')
+    check("firstName")
       .optional()
       .isString()
       .isLength({ min: 3, max: 80 })
-      .withMessage('Invalid firstName'),
-    check('lastName')
+      .withMessage("Invalid firstName"),
+    check("lastName")
       .optional()
       .isString()
       .isLength({ min: 3, max: 80 })
-      .withMessage('Invalid lastName'),
-    check('email')
+      .withMessage("Invalid lastName"),
+    check("email")
       .optional()
       .isEmail()
       .isLength({ min: 3, max: 80 })
-      .withMessage('Invalid email'),
+      .withMessage("Invalid email"),
     // TODO validate for the ethereum address specific
-    check('ethereumAddress')
+    check("ethereumAddress")
       .isString()
       .isLength({ min: 3, max: 80 })
-      .withMessage('Invalid ethereumAddress'),
-    check('signature')
+      .withMessage("Invalid ethereumAddress"),
+    check("signature")
       .isString()
       .isLength({ min: 3, max: 400 })
-      .withMessage('Invalid signature'),
+      .withMessage("Invalid signature"),
   ],
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       const errors = validationResult(request);
       if (!errors.isEmpty()) {
         return next(
-          new CustomError('Invalid fields', 400, '00002', errors.array())
+          new CustomError("Invalid fields", 400, "00002", errors.array())
         );
       }
       const userDetails = await createUser({
@@ -80,7 +80,7 @@ userRouter.post(
       });
       response.status(200).send(userDetails);
     } catch (e: any) {
-      console.error('Error');
+      console.error("Error");
       if (e instanceof CustomError) return next(e);
       return next(new CustomError(undefined, undefined, undefined, e));
     }
@@ -88,23 +88,23 @@ userRouter.post(
 );
 
 userRouter.post(
-  '/login',
+  "/login",
   [
-    check('ethereumAddress')
+    check("ethereumAddress")
       .isString()
       .isLength({ min: 3, max: 80 })
-      .withMessage('Invalid ethereumAddress'),
-    check('signature')
+      .withMessage("Invalid ethereumAddress"),
+    check("signature")
       .isString()
       .isLength({ min: 3, max: 400 })
-      .withMessage('Invalid signature'),
+      .withMessage("Invalid signature"),
   ],
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       const errors = validationResult(request);
       if (!errors.isEmpty()) {
         return next(
-          new CustomError('Invalid fields', 400, '00002', errors.array())
+          new CustomError("Invalid fields", 400, "00002", errors.array())
         );
       }
       const userDetails = await loginUser(
@@ -113,7 +113,7 @@ userRouter.post(
       );
       response.status(200).send(userDetails);
     } catch (e: any) {
-      console.error('Error');
+      console.error("Error");
       if (e instanceof CustomError) return next(e);
       return next(new CustomError(undefined, undefined, undefined, e));
     }
@@ -121,36 +121,36 @@ userRouter.post(
 );
 
 userRouter.patch(
-  '/',
+  "/",
   validateJWT, // populates req.user by validating JWT
   [
-    check('NFT.name')
+    check("NFT.name")
       .optional()
       .isString()
       .isLength({ min: 3, max: 80 })
-      .withMessage('Invalid NFT.name'),
-    check('NFT.contractAddress')
+      .withMessage("Invalid NFT.name"),
+    check("NFT.contractAddress")
       .optional()
       .isString()
       .isLength({ min: 3, max: 80 })
-      .withMessage('Invalid signature'),
-    check('NFT.tokenId')
+      .withMessage("Invalid signature"),
+    check("NFT.tokenId")
       .optional()
       .isString()
       .isLength({ min: 3, max: 80 })
-      .withMessage('Invalid NFT.contractAddress'),
-    check('NFT.eventId')
+      .withMessage("Invalid NFT.contractAddress"),
+    check("NFT.eventId")
       .optional()
       .isString()
       .isLength({ min: 3, max: 80 })
-      .withMessage('Invalid NFT.contractAddress'),
+      .withMessage("Invalid NFT.contractAddress"),
   ],
   async (request: UserRequest, response: Response, next: NextFunction) => {
     try {
       const errors = validationResult(request);
       if (!errors.isEmpty()) {
         return next(
-          new CustomError('Invalid fields', 400, '00002', errors.array())
+          new CustomError("Invalid fields", 400, "00002", errors.array())
         );
       }
       const userDetails = await updateUser(
@@ -159,7 +159,7 @@ userRouter.patch(
       );
       response.status(200).send(userDetails);
     } catch (e: any) {
-      console.error('Error');
+      console.error("Error");
       if (e instanceof CustomError) return next(e);
       return next(new CustomError(undefined, undefined, undefined, e));
     }
@@ -167,7 +167,7 @@ userRouter.patch(
 );
 
 userRouter.get(
-  '/:userId',
+  "/:userId",
   validateJWT,
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.params.userId;
@@ -177,9 +177,9 @@ userRouter.get(
 );
 
 userRouter.patch(
-  '/:userId/upload',
+  "/:userId/upload",
   validateJWT,
-  upload.single('image'),
+  upload.single("image"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.params.userId;
@@ -190,15 +190,15 @@ userRouter.patch(
       );
       res.status(200).send(user);
     } catch (error) {
-      console.log('ERROR', error);
+      console.log("ERROR", error);
     }
   }
 );
 
 userRouter.use(function (err, req, res, next) {
   if (err) {
-    console.log('Error', err);
+    console.log("Error", err);
   } else {
-    console.log('404');
+    console.log("404");
   }
 });

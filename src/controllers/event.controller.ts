@@ -1,10 +1,10 @@
-import path from 'path';
-import fs from 'fs';
-import { v4 as uuidv4 } from 'uuid';
-import Event, { IEvent } from '../services/mongodb/event.schema';
-import storeInIPFS from '../utils/store_in_ipfs';
-import { logger } from '../utils/logger';
-import CustomError from '../exceptions/custom_error';
+import path from "path";
+import fs from "fs";
+import { v4 as uuidv4 } from "uuid";
+import Event, { IEvent } from "../models/event.schema";
+import storeInIPFS from "../utils/store_in_ipfs";
+import { logger } from "../utils/logger";
+import CustomError from "../exceptions/custom_error";
 
 export interface EventResponse {
   id: string;
@@ -77,8 +77,8 @@ export const createEvent = async (request: IEvent) => {
     return { eventId, ItemNFTImageHash };
   } catch (error: any) {
     if (error instanceof CustomError) throw error;
-    logger.error('Error in logging the user : ', error);
-    throw new CustomError('Oops! something went wrong', 500, undefined, error);
+    logger.error("Error in logging the user : ", error);
+    throw new CustomError("Oops! something went wrong", 500, undefined, error);
   }
 };
 
@@ -87,20 +87,20 @@ export const updateEvent = async (eventId: string, itemEventId: string) => {
     await Event.updateOne({ id: eventId }, { itemEventId });
   } catch (error: any) {
     if (error instanceof CustomError) throw error;
-    logger.error('Error in logging the user : ', error);
-    throw new CustomError('Oops! something went wrong', 500, undefined, error);
+    logger.error("Error in logging the user : ", error);
+    throw new CustomError("Oops! something went wrong", 500, undefined, error);
   }
 };
 
 export const getEventById = async (eventId: string) => {
   try {
     const event = await Event.findOne({ id: eventId });
-    if (!event) throw new CustomError('Event not found', 404, undefined);
+    if (!event) throw new CustomError("Event not found", 404, undefined);
     return sanitizeEventResponse(event);
   } catch (error: any) {
     if (error instanceof CustomError) throw error;
-    logger.error('Error in logging the user : ', error);
-    throw new CustomError('Oops! something went wrong', 500, undefined, error);
+    logger.error("Error in logging the user : ", error);
+    throw new CustomError("Oops! something went wrong", 500, undefined, error);
   }
 };
 
@@ -111,7 +111,7 @@ export const getAllEvent = async () => {
     return sanitizedEvents;
   } catch (error: any) {
     if (error instanceof CustomError) throw error;
-    logger.error('Error in logging the user : ', error);
-    throw new CustomError('Oops! something went wrong', 500, undefined, error);
+    logger.error("Error in logging the user : ", error);
+    throw new CustomError("Oops! something went wrong", 500, undefined, error);
   }
 };

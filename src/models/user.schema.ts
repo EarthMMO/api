@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model } from "mongoose";
 
 export interface NFT {
   name?: string;
@@ -35,7 +35,7 @@ const UserSchema = new Schema<IUser>({
     type: String,
     match: [
       UsernameRegex,
-      'firstName can only have alphabets, numbers and underscores',
+      "firstName can only have alphabets, numbers and underscores",
     ],
     minlength: 3,
     maxlength: 50,
@@ -44,7 +44,7 @@ const UserSchema = new Schema<IUser>({
     type: String,
     match: [
       UsernameRegex,
-      'lastName can only have alphabets, numbers and underscores',
+      "lastName can only have alphabets, numbers and underscores",
     ],
     minlength: 3,
     maxlength: 50,
@@ -88,6 +88,6 @@ const UserSchema = new Schema<IUser>({
   },
 });
 
-const UserModel = model<IUser>('User', UserSchema);
+const UserModel = model<IUser>("User", UserSchema);
 
 export default UserModel;

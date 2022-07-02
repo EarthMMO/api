@@ -1,8 +1,8 @@
-import CustomError from '../exceptions/custom_error';
-import GroupModel, { IGroup } from '../services/mongodb/group.schema';
-import UserModel from '../services/mongodb/user.schema';
-import { logger } from '../utils/logger';
-import { v4 as uuidv4 } from 'uuid';
+import CustomError from "../exceptions/custom_error";
+import GroupModel, { IGroup } from "../models/group.schema";
+import UserModel from "../models/user.schema";
+import { logger } from "../utils/logger";
+import { v4 as uuidv4 } from "uuid";
 
 export interface GroupResponse {
   id?: string;
@@ -57,20 +57,20 @@ export const createGroup = async (request: any) => {
     return { id };
   } catch (error: any) {
     if (error instanceof CustomError) throw error;
-    logger.error('Error in logging the group: ', error);
-    throw new CustomError('Oops! something went wrong', 500, undefined, error);
+    logger.error("Error in logging the group: ", error);
+    throw new CustomError("Oops! something went wrong", 500, undefined, error);
   }
 };
 
 export const getGroupById = async (groupId: string) => {
   try {
     const group = await GroupModel.findOne({ id: groupId });
-    if (!group) throw new CustomError('Group not found', 404, undefined);
+    if (!group) throw new CustomError("Group not found", 404, undefined);
     return sanitizeGroupResponse(group);
   } catch (error: any) {
     if (error instanceof CustomError) throw error;
-    logger.error('Error in logging the group: ', error);
-    throw new CustomError('Oops! something went wrong', 500, undefined, error);
+    logger.error("Error in logging the group: ", error);
+    throw new CustomError("Oops! something went wrong", 500, undefined, error);
   }
 };
 
@@ -83,7 +83,7 @@ export const getAllGroups = async () => {
     return sanitizedGroups;
   } catch (error: any) {
     if (error instanceof CustomError) throw error;
-    logger.error('Error in logging the group: ', error);
-    throw new CustomError('Oops! something went wrong', 500, undefined, error);
+    logger.error("Error in logging the group: ", error);
+    throw new CustomError("Oops! something went wrong", 500, undefined, error);
   }
 };
