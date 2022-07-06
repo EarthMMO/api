@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import ethers from "ethers";
+import { ethers } from "ethers";
 
 /**
  * Generate hash of private key from the mnemonics with various derivation path suffixes
