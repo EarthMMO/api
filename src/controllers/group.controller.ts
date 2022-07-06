@@ -1,8 +1,9 @@
-import CustomError from "../exceptions/custom_error";
-import GroupModel, { IGroup } from "../models/group.schema";
-import UserModel from "../models/user.schema";
-import { logger } from "../utils/logger";
 import { v4 as uuidv4 } from "uuid";
+
+import CustomError from "exceptions/custom_error";
+import GroupModel, { IGroup } from "models/group.schema";
+import UserModel from "models/user.schema";
+import { logger } from "utils/logger";
 
 export interface GroupResponse {
   id?: string;

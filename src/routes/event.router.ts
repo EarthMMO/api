@@ -1,17 +1,15 @@
-const multer = require("multer");
 import express, { NextFunction, Request, Response } from "express";
+import multer from "multer";
 import { check, validationResult } from "express-validator";
-import CustomError from "../exceptions/custom_error";
+
+import CustomError from "exceptions/custom_error";
 import {
   createEvent,
   getAllEvent,
   getEventById,
   updateEvent,
-} from "../controllers/event.controller";
-import {
-  validateJWT,
-  UserRequest,
-} from "../middlewares/validate_jwt.middleware";
+} from "controllers/event.controller";
+import { validateJWT, UserRequest } from "middlewares/validate_jwt.middleware";
 
 const storage = multer.diskStorage({
   destination: (req: Request, file: any, cb: any) => {

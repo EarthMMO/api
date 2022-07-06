@@ -4,18 +4,15 @@ import express, { NextFunction, Request, Response } from "express";
 import multer from "multer";
 import { check, validationResult } from "express-validator";
 
-import CustomError from "../exceptions/custom_error";
-import UserModel from "../models/user.schema";
-import {
-  UserRequest,
-  validateJWT,
-} from "../middlewares/validate_jwt.middleware";
+import CustomError from "exceptions/custom_error";
+import UserModel from "models/user.schema";
+import { UserRequest, validateJWT } from "middlewares/validate_jwt.middleware";
 import {
   createUser,
   getUser,
   loginUser,
   updateUser,
-} from "../controllers/user.controller";
+} from "controllers/user.controller";
 
 const storage = multer.diskStorage({
   destination: function (req, file, callback) {

@@ -1,15 +1,15 @@
-// import ether from 'ethers';
-const ether = require("ethers");
-import { v4 as uuidv4 } from "uuid";
+import ethers from "ethers";
 import fs from "fs";
 import path from "path";
-import User, { NFT } from "../models/user.schema";
-import Event, { IEvent } from "../models/event.schema";
-import { createToken } from "../utils/jwt";
-import { generateSecret } from "../utils/secret";
-import storeInIPFS from "../utils/store_in_ipfs";
-import CustomError from "../exceptions/custom_error";
-import { logger } from "../utils/logger";
+import { v4 as uuidv4 } from "uuid";
+
+import CustomError from "exceptions/custom_error";
+import Event, { IEvent } from "models/event.schema";
+import User, { NFT } from "models/user.schema";
+import generateSecret from "utils/secret";
+import storeInIPFS from "utils/store_in_ipfs";
+import { createToken } from "utils/jwt";
+import { logger } from "utils/logger";
 
 /**
  * This function receives the string binary, store it in the IPFS and return path
@@ -42,7 +42,7 @@ export const createUser = async (userRequest: createUserRequest) => {
       return jwtDetails;
     }
     // verify the signature
-    const addressOfTheSigner = ether.utils.verifyMessage(
+    const addressOfTheSigner = ethers.utils.verifyMessage(
       Buffer.from("hello"),
       signature as string
     );
@@ -117,7 +117,7 @@ export const loginUser = async (ethereumAddress: string, signature: string) => {
   try {
     // verify the signature
 
-    const addressOfTheSigner = ether.utils.verifyMessage(
+    const addressOfTheSigner = ethers.utils.verifyMessage(
       Buffer.from("hello"),
       signature as string
     );

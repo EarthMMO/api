@@ -1,10 +1,11 @@
-import path from "path";
 import fs from "fs";
+import path from "path";
 import { v4 as uuidv4 } from "uuid";
-import Event, { IEvent } from "../models/event.schema";
-import storeInIPFS from "../utils/store_in_ipfs";
-import { logger } from "../utils/logger";
-import CustomError from "../exceptions/custom_error";
+
+import CustomError from "exceptions/custom_error";
+import Event, { IEvent } from "models/event.schema";
+import storeInIPFS from "utils/store_in_ipfs";
+import { logger } from "utils/logger";
 
 export interface EventResponse {
   id: string;

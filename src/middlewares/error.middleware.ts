@@ -1,5 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
-import CustomError from '../exceptions/custom_error';
+import { Request, Response, NextFunction } from "express";
+
+import CustomError from "exceptions/custom_error";
 
 /**
  * Custom error handler to standardize error objects returned to
@@ -21,7 +22,7 @@ function errorMiddleware(
   let customError = error;
 
   if (!(customError instanceof CustomError)) {
-    customError = new CustomError('Internal Server Error', 500, '00001', error);
+    customError = new CustomError("Internal Server Error", 500, "00001", error);
   }
   response.status((customError as CustomError).status).send(customError);
 }

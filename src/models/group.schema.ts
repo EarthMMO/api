@@ -2,7 +2,6 @@ import { Schema, model } from "mongoose";
 
 export interface IGroup {
   id?: string;
-  created: Date;
   adminId?: string;
   name: string;
   description?: string;
@@ -10,35 +9,39 @@ export interface IGroup {
   maxGroupSize: number;
 }
 
-const GroupSchema = new Schema<IGroup>({
-  id: {
-    type: String,
-    unique: true,
-  },
-  created: { type: Date, default: Date.now },
-  adminId: {
-    type: String,
-    required: true,
-  },
-  name: {
-    type: String,
-    required: true,
-  },
-  description: {
-    type: String,
-  },
-  members: [
-    {
-      id: {
-        type: String,
-      },
-      profileImagePath: {
-        type: String,
-      },
+const GroupSchema = new Schema<IGroup>(
+  {
+    id: {
+      type: String,
+      unique: true,
     },
-  ],
-  maxGroupSize: Number,
-});
+    adminId: {
+      type: String,
+      required: true,
+    },
+    name: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+    },
+    members: [
+      {
+        id: {
+          type: String,
+        },
+        profileImagePath: {
+          type: String,
+        },
+      },
+    ],
+    maxGroupSize: Number,
+  },
+  {
+    timestamps: true,
+  }
+);
 
 const GroupModel = model<IGroup>("group", GroupSchema);
 
