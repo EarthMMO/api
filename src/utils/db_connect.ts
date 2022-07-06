@@ -1,5 +1,6 @@
-import Mongoose from 'mongoose';
-import { logger } from './logger';
+import Mongoose from "mongoose";
+
+import { logger } from "utils/logger";
 
 let database: Mongoose.Connection;
 
@@ -10,9 +11,9 @@ export const connect = async () => {
   }
   try {
     await Mongoose.connect(uri);
-    logger.info(`Connected to MongoDB...${uri.split('@')[1]}`);
+    logger.info(`Connected to MongoDB...${uri.split("@")[1]}`);
   } catch (e) {
-    logger.error('Error connecting to mongodb...', e);
+    logger.error("Error connecting to mongodb...", e);
   }
 };
 

@@ -1,18 +1,19 @@
 // @ts-nocheck
-const bip39 = require("bip39");
-const bodyParser = require("body-parser");
-const { networkInterfaces } = require("os");
+import bodyParser from "body-parser";
 import cors from "cors";
-import defaultLogger, { logger } from "./src/utils/logger";
 import dotenv from "dotenv";
-import errorMiddleware from "./src/middlewares/error.middleware";
-import eventRouter from "./src/routes/event.router";
 import express from "express";
-import groupRouter from "./src/routes/group.router";
 import helmet from "helmet";
 import multer from "multer";
-import userRouter from "./src/routes/user.router";
-import { connect } from "./src/utils/db_connect";
+import { mnemonicToSeedSync } from "bip39";
+import { networkInterfaces } from "os";
+
+import defaultLogger, { logger } from "utils/logger";
+import errorMiddleware from "middlewares/error.middleware";
+import eventRouter from "routes/event.router";
+import groupRouter from "routes/group.router";
+import userRouter from "routes/user.router";
+import { connect } from "utils/db_connect";
 
 dotenv.config();
 
@@ -52,8 +53,12 @@ const getNetworkAddress = () => {
 
 app.listen(port, async () => {
   await connect();
-  getNetworkAddress();
-  const seed = bip39.mnemonicToSeedSync(process.env.MNEMONIC);
+  if (port !== "8000") {
+    getNetworkAddress();
+  } else {
+    process.env.SERVER_ADDRESS = "localhost";
+  }
+  const seed = mnemonicToSeedSync(process.env.MNEMONIC);
   process.env.SEED_HEX = seed.toString("hex");
 
   const CORE_API_PATH_PREFIX = `/api/v${process.env.SERVER_VERSION as string}`;
@@ -62,7 +67,7 @@ app.listen(port, async () => {
   app.use(`${CORE_API_PATH_PREFIX}/group`, groupRouter);
   app.use(errorMiddleware);
 
-  logger.info(`Server running on port ${process.env.SERVER_ADDRESS}:${port}`);
+  logger.info(`Server running on ${process.env.SERVER_ADDRESS}:${port}`);
 });
 
 app.use(function (err, req, res, next) {

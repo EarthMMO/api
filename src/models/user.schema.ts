@@ -25,68 +25,73 @@ export interface IUser {
 
 export const UsernameRegex = /(?!^(1|3|bc1|lnbc1))^[0-9a-z_]{3,50}$/i;
 
-const UserSchema = new Schema<IUser>({
-  id: {
-    type: String,
-    unique: true,
-    require: true,
-  },
-  firstName: {
-    type: String,
-    match: [
-      UsernameRegex,
-      "firstName can only have alphabets, numbers and underscores",
-    ],
-    minlength: 3,
-    maxlength: 50,
-  },
-  lastName: {
-    type: String,
-    match: [
-      UsernameRegex,
-      "lastName can only have alphabets, numbers and underscores",
-    ],
-    minlength: 3,
-    maxlength: 50,
-  },
-  email: {
-    type: String,
-    minlength: 3,
-    maxlength: 100,
-  },
-  profileImagePath: {
-    type: String,
-  },
-  profileNFTIPFSHash: {
-    type: String,
-    required: true,
-    maxlength: 250,
-  },
-  NFTs: [
-    {
-      name: { type: String },
-      contractAddress: { type: String },
-      tokenId: { type: String },
-      eventId: { type: String },
+const UserSchema = new Schema<IUser>(
+  {
+    id: {
+      type: String,
+      unique: true,
+      require: true,
     },
-  ],
-  ethereumAddress: {
-    type: String,
-    unique: true,
-    required: true,
-    minlength: 3,
-    maxlength: 350,
+    firstName: {
+      type: String,
+      match: [
+        UsernameRegex,
+        "firstName can only have alphabets, numbers and underscores",
+      ],
+      minlength: 3,
+      maxlength: 50,
+    },
+    lastName: {
+      type: String,
+      match: [
+        UsernameRegex,
+        "lastName can only have alphabets, numbers and underscores",
+      ],
+      minlength: 3,
+      maxlength: 50,
+    },
+    email: {
+      type: String,
+      minlength: 3,
+      maxlength: 100,
+    },
+    profileImagePath: {
+      type: String,
+    },
+    profileNFTIPFSHash: {
+      type: String,
+      required: true,
+      maxlength: 250,
+    },
+    NFTs: [
+      {
+        name: { type: String },
+        contractAddress: { type: String },
+        tokenId: { type: String },
+        eventId: { type: String },
+      },
+    ],
+    ethereumAddress: {
+      type: String,
+      unique: true,
+      required: true,
+      minlength: 3,
+      maxlength: 350,
+    },
+    publicKey: {
+      type: String,
+      maxlength: 350,
+    },
+    derivationSuffix: {
+      type: Number,
+      unique: true,
+      require: true,
+    },
   },
-  publicKey: {
-    type: String,
-    maxlength: 350,
-  },
-  derivationSuffix: {
-    type: Number,
-    unique: true,
-    require: true,
-  },
-});
+  {
+    timestamps: true,
+  }
+);
 
 const UserModel = model<IUser>("User", UserSchema);
 

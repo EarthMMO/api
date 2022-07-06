@@ -1,5 +1,5 @@
-import { ethers } from 'ethers';
-import crypto from 'crypto';
+import crypto from "crypto";
+import { ethers } from "ethers";
 
 /**
  * Generate hash of private key from the mnemonics with various derivation path suffixes
@@ -7,12 +7,12 @@ import crypto from 'crypto';
  * @param derivationSuffix
  * @returns
  */
-
-export const generateSecret = (derivationSuffix: number) => {
-
+const generateSecret = (derivationSuffix: number) => {
   const wallet = ethers.Wallet.fromMnemonic(
     process.env.MNEMONIC as string,
     `${process.env.PATH_PASS_ENCRYPT as string}${derivationSuffix}`
   );
-  return crypto.createHash('md5').update(wallet.privateKey).digest('hex');
+  return crypto.createHash("md5").update(wallet.privateKey).digest("hex");
 };
+
+export default generateSecret;
