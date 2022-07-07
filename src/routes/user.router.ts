@@ -1,11 +1,11 @@
 // @ts-nocheck
 import * as fs from "fs";
 import express, { NextFunction, Request, Response } from "express";
-import multer from "multer";
 import { check, validationResult } from "express-validator";
 
 import CustomError from "exceptions/custom_error";
 import UserModel from "models/user.schema";
+import upload from "utils/multer";
 import { UserRequest, validateJWT } from "middlewares/validate_jwt.middleware";
 import {
   createUser,
@@ -13,21 +13,6 @@ import {
   loginUser,
   updateUser,
 } from "controllers/user.controller";
-
-const storage = multer.diskStorage({
-  destination: function (req, file, callback) {
-    callback(null, "static/uploads");
-  },
-  filename: function (req, file, callback) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    callback(null, file.originalname + "-" + uniqueSuffix + ".png");
-  },
-});
-
-const upload = multer({
-  storage: storage,
-  limits: { fieldSize: 10 * 1024 * 1024 },
-}); //10MB
 
 const userRouter = express.Router();
 export { userRouter as default };

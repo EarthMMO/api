@@ -1,9 +1,10 @@
+import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 
 import CustomError from "exceptions/custom_error";
-import GroupModel, { IGroup } from "models/group.schema";
+import Group, { IGroup } from "models/group.schema";
 import UserModel from "models/user.schema";
-import { logger } from "utils/logger";
+import { UserRequest } from "middlewares/validate_jwt.middleware";
 
 export interface GroupResponse {
   id?: string;
@@ -21,70 +22,107 @@ const sanitizeGroupResponse = (group: IGroup): GroupResponse => {
   return _group;
 };
 
-export const createGroup = async (request: any) => {
-  try {
-    const id = uuidv4();
-    const { adminId, description, maxGroupSize, name } = request;
-    const admin = await UserModel.findOne({ id: adminId });
+export default {
+  onCreateGroup: async (request: UserRequest, response: Response) => {
+    try {
+      const { description, maxGroupSize, name } = request.body;
+      const adminId = request.userDetails?.id as string;
+      const admin = await UserModel.findOne({ id: adminId });
 
-    logger.debug({
-      adminId,
-      description,
-      id,
-      maxGroupSize,
-      members: [
-        {
-          id: adminId,
-          profileImagePath: admin?.profileImagePath,
-        },
-      ],
-      name,
-    });
+      const group = await Group.create({
+        adminId,
+        description,
+        id: uuidv4(),
+        maxGroupSize,
+        members: [
+          {
+            id: adminId,
+            profileImagePath: admin?.profileImagePath,
+          },
+        ],
+        name,
+      });
 
-    await GroupModel.create({
-      adminId,
-      description,
-      id,
-      maxGroupSize,
-      members: [
-        {
-          id: adminId,
-          profileImagePath: admin?.profileImagePath,
-        },
-      ],
-      name,
-    });
+      return response.status(200).json(group);
+    } catch (error: any) {
+      return response.status(500).json(error);
+    }
+  },
+  onGetAllGroups: async (request: Request, response: Response) => {
+    try {
+      const groups = await Group.find();
+      const sanitizedGroups = groups.map((group: any) =>
+        sanitizeGroupResponse(group)
+      );
+      return response.status(200).json(sanitizedGroups);
+    } catch (error: any) {
+      return response.status(500).json(error);
+    }
+  },
+  onGetGroupById: async (request: Request, response: Response) => {
+    try {
+      const group = await Group.findOne({ id: request.params.groupId });
+      const sanitizedGroup = sanitizeGroupResponse(group!);
+      return response.status(200).json(sanitizedGroup);
+    } catch (error: any) {
+      return response.status(500).json(error);
+    }
+  },
+  onJoinOrLeaveGroup: async (request: Request, response: Response) => {
+    try {
+      const groupId = request.params.groupId;
+      const userId = request.body.userId;
+      const action = request.body.action;
 
-    return { id };
-  } catch (error: any) {
-    if (error instanceof CustomError) throw error;
-    logger.error("Error in logging the group: ", error);
-    throw new CustomError("Oops! something went wrong", 500, undefined, error);
-  }
-};
+      const user = await UserModel.findOne({ id: userId });
+      let group = await Group.findOne({ id: groupId });
 
-export const getGroupById = async (groupId: string) => {
-  try {
-    const group = await GroupModel.findOne({ id: groupId });
-    if (!group) throw new CustomError("Group not found", 404, undefined);
-    return sanitizeGroupResponse(group);
-  } catch (error: any) {
-    if (error instanceof CustomError) throw error;
-    logger.error("Error in logging the group: ", error);
-    throw new CustomError("Oops! something went wrong", 500, undefined, error);
-  }
-};
+      if (!user || !group) {
+        throw new CustomError("Invalid userId or groupId", 400, "00003", {});
+      }
+      if (group?.members.length! + 1 > +group?.maxGroupSize!) {
+        throw new CustomError(
+          "Can not add more participants!",
+          400,
+          "00004",
+          {}
+        );
+      }
 
-export const getAllGroups = async () => {
-  try {
-    const groups = await GroupModel.find({});
-    const sanitizedGroups = groups.map((group: any) =>
-      sanitizeGroupResponse(group)
-    );
-    return sanitizedGroups;
-  } catch (error: any) {
-    if (error instanceof CustomError) throw error;
-    logger.error("Error in logging the group: ", error);
-    throw new CustomError("Oops! something went wrong", 500, undefined, error);
-  }
+      if (action === "join") {
+        group = await Group.findOneAndUpdate(
+          { id: groupId },
+          {
+            $push: {
+              members: {
+                id: userId,
+                profileImagePath: user.profileImagePath,
+              },
+            },
+          },
+          {
+            new: true,
+          }
+        );
+      } else if (action === "leave") {
+        group = await Group.findOneAndUpdate(
+          { id: groupId },
+          {
+            $pull: {
+              members: {
+                id: userId,
+              },
+            },
+          },
+          {
+            new: true,
+          }
+        );
+      }
+
+      return response.status(200).json(group);
+    } catch (error: any) {
+      return response.status(500).json(error);
+    }
+  },
 };

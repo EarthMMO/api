@@ -11,9 +11,9 @@ export const connect = async () => {
   }
   try {
     await Mongoose.connect(uri);
-    logger.info(`Connected to MongoDB...${uri.split("@")[1]}`);
-  } catch (e) {
-    logger.error("Error connecting to mongodb...", e);
+    logger.info(`Connected to MongoDB: ${uri.split("@")[1]}`);
+  } catch (error) {
+    logger.error("Error connecting to MongoDB:", error);
   }
 };
 

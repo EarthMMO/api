@@ -1,6 +1,6 @@
-import ethers from "ethers";
 import fs from "fs";
 import path from "path";
+import { ethers } from "ethers";
 import { v4 as uuidv4 } from "uuid";
 
 import CustomError from "exceptions/custom_error";
