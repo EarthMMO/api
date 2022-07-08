@@ -8,12 +8,11 @@ import { UserRequest } from "middlewares/validate_jwt.middleware";
 
 export interface GroupResponse {
   id?: string;
-  created: Date;
   adminId?: string;
   name: string;
   description?: string;
-  members: string[];
   maxGroupSize: number;
+  members: string[];
 }
 
 const sanitizeGroupResponse = (group: IGroup): GroupResponse => {
@@ -30,9 +29,10 @@ export default {
       const admin = await UserModel.findOne({ id: adminId });
 
       const group = await Group.create({
-        adminId,
-        description,
         id: uuidv4(),
+        adminId,
+        name,
+        description,
         maxGroupSize,
         members: [
           {
@@ -40,11 +40,11 @@ export default {
             profileImagePath: admin?.profileImagePath,
           },
         ],
-        name,
       });
 
       return response.status(200).json(group);
     } catch (error: any) {
+      console.error(error);
       return response.status(500).json(error);
     }
   },
@@ -56,6 +56,7 @@ export default {
       );
       return response.status(200).json(sanitizedGroups);
     } catch (error: any) {
+      console.error(error);
       return response.status(500).json(error);
     }
   },
@@ -65,6 +66,7 @@ export default {
       const sanitizedGroup = sanitizeGroupResponse(group!);
       return response.status(200).json(sanitizedGroup);
     } catch (error: any) {
+      console.error(error);
       return response.status(500).json(error);
     }
   },
@@ -80,7 +82,10 @@ export default {
       if (!user || !group) {
         throw new CustomError("Invalid userId or groupId", 400, "00003", {});
       }
-      if (group?.members.length! + 1 > +group?.maxGroupSize!) {
+      if (
+        action === "join" &&
+        group?.members.length! + 1 > +group?.maxGroupSize!
+      ) {
         throw new CustomError(
           "Can not add more participants!",
           400,
@@ -122,6 +127,7 @@ export default {
 
       return response.status(200).json(group);
     } catch (error: any) {
+      console.error(error);
       return response.status(500).json(error);
     }
   },

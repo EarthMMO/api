@@ -1,207 +1,105 @@
-import fs from "fs";
-import path from "path";
+import { Request, Response } from "express";
 import { ethers } from "ethers";
 import { v4 as uuidv4 } from "uuid";
 
 import CustomError from "exceptions/custom_error";
-import Event, { IEvent } from "models/event.schema";
-import User, { NFT } from "models/user.schema";
+import User from "models/user.schema";
 import generateSecret from "utils/secret";
-import storeInIPFS from "utils/store_in_ipfs";
 import { createToken } from "utils/jwt";
-import { logger } from "utils/logger";
+import { fetchEventNFTHashes } from "utils";
 
-/**
- * This function receives the string binary, store it in the IPFS and return path
- * @param data
- * @returns
- */
+export default {
+  onCreateOrLoginUser: async (request: Request, response: Response) => {
+    try {
+      const { firstName, lastName, email, ethereumAddress, signature } =
+        request.body;
 
-/**
- * Creates user record for EarthMMO
- * @param userRequest
- * @returns
- */
-export const createUser = async (userRequest: createUserRequest) => {
-  try {
-    const { firstName, lastName, email, ethereumAddress, signature } =
-      userRequest;
-    const exitingUserDetails = await User.findOne(
-      { ethereumAddress },
-      { _id: 1, profileNFTIPFSHash: 1 }
-    );
+      const signerAddress = ethers.utils.verifyMessage(
+        Buffer.from("hello"),
+        signature as string
+      );
+      if (signerAddress !== ethereumAddress) {
+        throw new CustomError("Invalid signature", 401, "401", {
+          ethereumAddress,
+        });
+      }
 
-    if (exitingUserDetails) {
-      const jwtDetails = (await loginUser(ethereumAddress, signature)) as {
-        jwt: string;
-        userId: string;
-        profileNFTIPFSHash?: string;
-      };
-      // append profileNFTIPFSHash of the user and send it with JWT a
-      jwtDetails.profileNFTIPFSHash = exitingUserDetails.profileNFTIPFSHash;
-      return jwtDetails;
+      let user = await User.findOne({ ethereumAddress });
+      let userId;
+      let derivationSuffix;
+      if (user) {
+        userId = user.id;
+        derivationSuffix = user.derivationSuffix;
+      } else {
+        userId = uuidv4();
+        const numberOfUsers = await User.countDocuments();
+        derivationSuffix = numberOfUsers + 1;
+        user = await User.create({
+          id: userId,
+          derivationSuffix,
+          email,
+          ethereumAddress,
+          firstName,
+          lastName,
+        });
+      }
+
+      const jwt = await createToken(
+        { id: user.id, ethereumAddress, suffix: derivationSuffix },
+        generateSecret(derivationSuffix)
+      );
+
+      return response.status(200).json({ jwt, userId });
+    } catch (error: any) {
+      console.error(error);
+      return response.status(500).json(error);
     }
-    // verify the signature
-    const addressOfTheSigner = ethers.utils.verifyMessage(
-      Buffer.from("hello"),
-      signature as string
-    );
-    if (addressOfTheSigner !== ethereumAddress)
-      throw new CustomError("Invalid signature", 400, "400", ethereumAddress);
-
-    //   ====  store the image in the IPFS  ===
-
-    //read profile pic
-    const userNFTFile = fs.readFileSync(
-      path.join(`${__dirname}/../../../static`, "profile.jpg")
-    );
-
-    // extract binary data from the file read
-    const fileBuffer = Buffer.from(userNFTFile);
-
-    // all the fileData to IPFS
-    const profileImagePath = await storeInIPFS(fileBuffer);
-
-    const bodyNFTMetaData = {
-      image: `${process.env.IPFS_FILE_PATH_UR}/${profileImagePath}`,
-      name: "EarthMMO-Profile body",
-    };
-
-    // store the metaData in IPFS
-    const NFTMetadataPath = await storeInIPFS(JSON.stringify(bodyNFTMetaData));
-    const userId = uuidv4();
-    const numberOfUsers = await User.countDocuments();
-    const derivationSuffix: number = numberOfUsers + 1;
-
-    // create a DB record
-    const userDetails = {
-      id: userId,
-      firstName,
-      lastName,
-      email,
-      profileNFTIPFSHash: NFTMetadataPath,
-      ethereumAddress,
-      derivationSuffix,
-    };
-
-    // Save document
-    await User.create(userDetails);
-    // create a JWT sign and send it
-
-    //get secret passing the path
-    const secret = generateSecret(derivationSuffix);
-
-    // create JWT
-    const jwt = await createToken(
-      { id: userId, firstName, ethereumAddress, suffix: derivationSuffix },
-      secret
-    );
-    return {
-      NFTMetadataPath,
-      jwt,
-      userId,
-      email,
-    };
-  } catch (error: any) {
-    if (error instanceof CustomError) throw error;
-    logger.error("Error in creating the user : ", error);
-    throw new CustomError(
-      "Oops! something went wrong",
-      400,
-      "undefined, error"
-    );
-  }
+  },
+  onGetAllUsers: async (request: Request, response: Response) => {
+    try {
+      const users = await User.find();
+      return response.status(200).json(users);
+    } catch (error: any) {
+      console.error(error);
+      return response.status(500).json(error);
+    }
+  },
+  onGetUserById: async (request: Request, response: Response) => {
+    try {
+      const userId = request.params.userId;
+      let user = await User.findOne({ id: userId });
+      const eventImageHashed = await fetchEventNFTHashes(user.NFTs);
+      user = { ...user.toObject(), NFTs: eventImageHashed };
+      return response.status(200).json(user);
+    } catch (error: any) {
+      console.error(error);
+      return response.status(500).json(error);
+    }
+  },
+  onUpdateUser: async (request: Request, response: Response) => {
+    try {
+      const user = await User.findOneAndUpdate(
+        { id: request.params.userId },
+        { $push: { NFTs: request.body.NFT } },
+        { new: true }
+      );
+      return response.status(200).json(user);
+    } catch (error: any) {
+      console.error(error);
+      return response.status(500).json(error);
+    }
+  },
+  onUploadUserImage: async (request: Request, response: Response) => {
+    try {
+      const userId = request.params.userId;
+      const user = await User.updateOne(
+        { id: userId },
+        { profileImagePath: request.file.path }
+      );
+      return response.status(200).json(user);
+    } catch (error: any) {
+      console.error(error);
+      return response.status(500).json(error);
+    }
+  },
 };
-
-export const loginUser = async (ethereumAddress: string, signature: string) => {
-  try {
-    // verify the signature
-
-    const addressOfTheSigner = ethers.utils.verifyMessage(
-      Buffer.from("hello"),
-      signature as string
-    );
-
-    if (addressOfTheSigner !== ethereumAddress)
-      throw new CustomError("Invalid signature", 401, "400", ethereumAddress);
-
-    const userDetails = await User.findOne(
-      { ethereumAddress },
-      { derivationSuffix: 1, userId: 1, firstName: 1, id: 1 }
-    );
-    if (!userDetails)
-      throw new CustomError("Please signup", 400, "400", ethereumAddress);
-    const { id, firstName, derivationSuffix } = userDetails;
-    const secret = generateSecret(derivationSuffix as number);
-
-    // create JWT
-    const jwt = await createToken(
-      { id, firstName, ethereumAddress, suffix: derivationSuffix },
-      secret
-    );
-
-    return { jwt, userId: id };
-  } catch (error: any) {
-    if (error instanceof CustomError) throw error;
-    logger.error("Error in loggingin the user : ", error);
-    throw new CustomError("Oops! something went wrong", 401, undefined, error);
-  }
-};
-
-export const updateUser = async (NFT: NFT, userId: string) => {
-  try {
-    const user = await User.findOne({ id: userId });
-    if (!user) throw new CustomError("User not found", 400, "400", userId);
-    await User.updateOne({ id: userId }, { $push: { NFTs: NFT } });
-  } catch (error: any) {
-    logger.error("Error in updating the user : ", error);
-    if (error instanceof CustomError) throw error;
-    throw new CustomError(
-      undefined,
-      error.statusCode ? error.statusCode : undefined,
-      undefined,
-      error
-    );
-  }
-};
-
-const fetchEventNFTHashes = (NTFs: NFT[]) => {
-  const promises = NTFs.map(async (nft: NFT) => {
-    console.log({ id: nft.eventId });
-    const event = (await Event.findOne({
-      id: nft.eventId,
-    })) as IEvent;
-    return event.ItemNFTImageHash as any;
-  });
-  return Promise.all(promises);
-};
-
-export const getUser = async (userId: string) => {
-  try {
-    const user = await User.findOne({ id: userId });
-
-    if (!user) throw new CustomError("User not found", 400, "400", userId);
-    const eventImageHashed = await fetchEventNFTHashes(user.NFTs);
-    console.log(user, { ...user.toObject() });
-    const _users = { ...user.toObject(), NFTs: eventImageHashed };
-
-    return _users;
-  } catch (error: any) {
-    logger.error("Error in updating the user : ", error);
-    if (error instanceof CustomError) throw error;
-    throw new CustomError(
-      undefined,
-      error.statusCode ? error.statusCode : undefined,
-      undefined,
-      error
-    );
-  }
-};
-
-export interface createUserRequest {
-  firstName: string;
-  lastName?: string;
-  email: string;
-  ethereumAddress: string;
-  signature: string;
-}
