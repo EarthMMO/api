@@ -45,6 +45,7 @@ export default {
 
       return response.status(200).json(group);
     } catch (error: any) {
+      console.error(error);
       return response.status(500).json(error);
     }
   },
@@ -56,6 +57,7 @@ export default {
       );
       return response.status(200).json(sanitizedGroups);
     } catch (error: any) {
+      console.error(error);
       return response.status(500).json(error);
     }
   },
@@ -65,6 +67,7 @@ export default {
       const sanitizedGroup = sanitizeGroupResponse(group!);
       return response.status(200).json(sanitizedGroup);
     } catch (error: any) {
+      console.error(error);
       return response.status(500).json(error);
     }
   },
@@ -80,7 +83,10 @@ export default {
       if (!user || !group) {
         throw new CustomError("Invalid userId or groupId", 400, "00003", {});
       }
-      if (group?.members.length! + 1 > +group?.maxGroupSize!) {
+      if (
+        action === "join" &&
+        group?.members.length! + 1 > +group?.maxGroupSize!
+      ) {
         throw new CustomError(
           "Can not add more participants!",
           400,
@@ -122,6 +128,7 @@ export default {
 
       return response.status(200).json(group);
     } catch (error: any) {
+      console.error(error);
       return response.status(500).json(error);
     }
   },

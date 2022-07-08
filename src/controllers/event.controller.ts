@@ -69,6 +69,7 @@ export default {
 
       return response.status(200).json(event);
     } catch (error: any) {
+      console.error(error);
       return response.status(500).json(error);
     }
   },
@@ -80,6 +81,7 @@ export default {
       );
       return response.status(200).json(sanitizedEvents);
     } catch (error: any) {
+      console.error(error);
       return response.status(500).json(error);
     }
   },
@@ -89,6 +91,7 @@ export default {
       const sanitizedEvent = sanitizeEventResponse(event!);
       return response.status(200).json(sanitizedEvent);
     } catch (error: any) {
+      console.error(error);
       return response.status(500).json(error);
     }
   },
@@ -100,6 +103,7 @@ export default {
       );
       response.status(200).json(event);
     } catch (error: any) {
+      console.error(error);
       return response.status(500).json(error);
     }
   },

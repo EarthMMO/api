@@ -1,12 +1,5 @@
 import { Schema, model } from "mongoose";
 
-export interface NFT {
-  name?: string;
-  contractAddress?: string;
-  tokenId?: string;
-  eventId: string;
-}
-
 export interface IUser {
   id: string;
   firstName: string;
@@ -23,6 +16,13 @@ export interface IUser {
   NFTs: Array<NFT>;
 }
 
+export interface NFT {
+  name?: string;
+  contractAddress?: string;
+  tokenId?: string;
+  eventId: string;
+}
+
 export const UsernameRegex = /(?!^(1|3|bc1|lnbc1))^[0-9a-z_]{3,50}$/i;
 
 const UserSchema = new Schema<IUser>(
@@ -30,7 +30,7 @@ const UserSchema = new Schema<IUser>(
     id: {
       type: String,
       unique: true,
-      require: true,
+      required: true,
     },
     firstName: {
       type: String,
@@ -60,7 +60,6 @@ const UserSchema = new Schema<IUser>(
     },
     profileNFTIPFSHash: {
       type: String,
-      required: true,
       maxlength: 250,
     },
     NFTs: [
@@ -84,8 +83,7 @@ const UserSchema = new Schema<IUser>(
     },
     derivationSuffix: {
       type: Number,
-      unique: true,
-      require: true,
+      required: true,
     },
   },
   {

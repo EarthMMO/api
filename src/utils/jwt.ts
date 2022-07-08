@@ -6,7 +6,6 @@ import { logger } from "utils/logger";
 
 export interface JWTContent {
   id: string;
-  firstName: string;
   ethereumAddress: string;
   suffix: number;
 }
@@ -75,11 +74,10 @@ export const verifyJWT = async (token: string): Promise<JWTContent> => {
           }
 
           const _decode = decoded as JwtPayload;
-          const { id, firstName, ethereumAddress, suffix } = _decode;
+          const { id, ethereumAddress, suffix } = _decode;
 
           return resolve({
             id,
-            firstName,
             ethereumAddress,
             suffix: Number(suffix),
           });
