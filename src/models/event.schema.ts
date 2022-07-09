@@ -60,6 +60,6 @@ const EventSchema = new Schema<IEvent>(
   }
 );
 
-const UserModel = model<IEvent>("event", EventSchema);
+const EventModel = model<IEvent>("event", EventSchema);
 
-export default UserModel;
+export default EventModel;

@@ -1,16 +1,13 @@
 class CustomError extends Error {
   status: number; // HTTP status code
-
-  errorCode: string; // Custom error codes. Not HTTP status codes.
-
+  errorCode: string; // Custom error code
   message: string;
-
   errorDetails: any;
 
   constructor(
-    message: string = 'Default Error',
+    message: string = "Default error",
     status: number = 500,
-    errorCode: string = '00000',
+    errorCode: string = "00000",
     errorDetails: any = {}
   ) {
     super(message);
