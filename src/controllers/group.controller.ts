@@ -8,12 +8,11 @@ import { UserRequest } from "middlewares/validate_jwt.middleware";
 
 export interface GroupResponse {
   id?: string;
-  created: Date;
   adminId?: string;
   name: string;
   description?: string;
-  members: string[];
   maxGroupSize: number;
+  members: string[];
 }
 
 const sanitizeGroupResponse = (group: IGroup): GroupResponse => {
@@ -30,9 +29,10 @@ export default {
       const admin = await UserModel.findOne({ id: adminId });
 
       const group = await Group.create({
-        adminId,
-        description,
         id: uuidv4(),
+        adminId,
+        name,
+        description,
         maxGroupSize,
         members: [
           {
@@ -40,7 +40,6 @@ export default {
             profileImagePath: admin?.profileImagePath,
           },
         ],
-        name,
       });
 
       return response.status(200).json(group);
