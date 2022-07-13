@@ -11,5 +11,3 @@ export const fetchEventNFTHashes = (NFTs: NFT[]) => {
   });
   return Promise.all(promises);
 };
-
-// asdasdasd
