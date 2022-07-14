@@ -1,7 +1,8 @@
 import { Schema, model } from "mongoose";
+import { v4 as uuidv4 } from "uuid";
 
 export interface IEvent {
-  id?: string;
+  _id: string;
   name: string;
   website?: string;
   description?: string;
@@ -16,9 +17,9 @@ export interface IEvent {
 
 const EventSchema = new Schema<IEvent>(
   {
-    id: {
+    _id: {
       type: String,
-      unique: true,
+      default: () => uuidv4().replaceAll("-", ""),
     },
     name: {
       type: String,

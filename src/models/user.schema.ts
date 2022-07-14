@@ -1,7 +1,8 @@
 import { Schema, model } from "mongoose";
+import { v4 as uuidv4 } from "uuid";
 
 export interface IUser {
-  id: string;
+  _id: string;
   firstName: string;
   lastName: string;
   email?: string;
@@ -27,10 +28,9 @@ export const UsernameRegex = /(?!^(1|3|bc1|lnbc1))^[0-9a-z_]{3,50}$/i;
 
 const UserSchema = new Schema<IUser>(
   {
-    id: {
+    _id: {
       type: String,
-      unique: true,
-      required: true,
+      default: () => uuidv4().replaceAll("-", ""),
     },
     firstName: {
       type: String,
