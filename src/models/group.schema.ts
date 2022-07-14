@@ -1,19 +1,20 @@
 import { Schema, model } from "mongoose";
+import { v4 as uuidv4 } from "uuid";
 
 export interface IGroup {
-  id?: string;
+  _id: string;
   adminId?: string;
   name: string;
   description?: string;
-  members: { id: string; profileImagePath?: string }[];
+  memberIds: string[];
   maxGroupSize: number;
 }
 
 const GroupSchema = new Schema<IGroup>(
   {
-    id: {
+    _id: {
       type: String,
-      unique: true,
+      default: () => uuidv4().replaceAll("-", ""),
     },
     adminId: {
       type: String,
@@ -26,16 +27,7 @@ const GroupSchema = new Schema<IGroup>(
     description: {
       type: String,
     },
-    members: [
-      {
-        id: {
-          type: String,
-        },
-        profileImagePath: {
-          type: String,
-        },
-      },
-    ],
+    memberIds: [String],
     maxGroupSize: Number,
   },
   {

@@ -2,25 +2,18 @@ import fs from "fs";
 import path from "path";
 import { Request, Response } from "express";
 import { UserRequest } from "middlewares/validate_jwt.middleware";
-import { v4 as uuidv4 } from "uuid";
 
-import Event, { IEvent } from "models/event.schema";
+import Event from "models/event.schema";
 import storeInIPFS from "utils/store_in_ipfs";
 
 export interface EventResponse {
-  id: string;
-  name: string;
-  numberOfMember: number;
-  ItemNFTImageHash: string;
+  _id: string;
   adminUserId: string;
   itemEventId: string;
+  itemNFTImageHash: string;
+  name: string;
+  numberOfMember: number;
 }
-
-const sanitizeEventResponse = (event: IEvent): EventResponse => {
-  const _event: any = event;
-  delete _event._id;
-  return _event;
-};
 
 export default {
   onCreateEvent: async (
@@ -49,17 +42,16 @@ export default {
       const fileBuffer = Buffer.from(eventNFTImage);
 
       // all the fileData to IPFS
-      const ItemNFTImageHash = await storeInIPFS(fileBuffer);
+      const itemNFTImageHash = await storeInIPFS(fileBuffer);
 
       const event = await Event.create({
-        id: uuidv4(),
         name,
         description,
         itemName,
         itemDescription,
         website,
         numberOfMember: Number(numberOfMember),
-        ItemNFTImageHash,
+        itemNFTImageHash,
         adminUserId: adminId,
       });
 
@@ -76,10 +68,7 @@ export default {
   onGetAllEvents: async (request: Request, response: Response) => {
     try {
       const events = await Event.find();
-      const sanitizedEvents = events.map((event: any) =>
-        sanitizeEventResponse(event)
-      );
-      return response.status(200).json(sanitizedEvents);
+      return response.status(200).json(events);
     } catch (error: any) {
       console.error(error);
       return response.status(500).json(error);
@@ -87,9 +76,8 @@ export default {
   },
   onGetEventById: async (request: Request, response: Response) => {
     try {
-      const event = await Event.findOne({ id: request.params.eventId });
-      const sanitizedEvent = sanitizeEventResponse(event!);
-      return response.status(200).json(sanitizedEvent);
+      const event = await Event.findOne({ _id: request.params.eventId });
+      return response.status(200).json(event);
     } catch (error: any) {
       console.error(error);
       return response.status(500).json(error);
@@ -98,7 +86,7 @@ export default {
   onUpdateEvent: async (request: Request, response: Response) => {
     try {
       const event = await Event.updateOne(
-        { id: request.params.eventId },
+        { _id: request.params.eventId },
         { itemEventId: request.body.itemEventId }
       );
       response.status(200).json(event);
