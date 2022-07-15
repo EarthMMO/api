@@ -36,26 +36,7 @@ export default {
   },
   onGetAllGroups: async (request: Request, response: Response) => {
     try {
-      const groups = await Group.aggregate([
-        {
-          $lookup: {
-            from: "users",
-            localField: "memberIds",
-            foreignField: "_id",
-            as: "members",
-          },
-        },
-        {
-          $project: {
-            _id: 1,
-            adminId: 1,
-            name: 1,
-            description: 1,
-            "members._id": 1,
-            "members.profileImagePath": 1,
-          },
-        },
-      ]);
+      const groups = await Group.getAllGroups();
       return response.status(200).json(groups);
     } catch (error: any) {
       console.error(error);
@@ -64,29 +45,8 @@ export default {
   },
   onGetGroupById: async (request: Request, response: Response) => {
     try {
-      const aggregate = await Group.aggregate([
-        { $match: { _id: request.params.groupId } },
-        {
-          $lookup: {
-            from: "users",
-            localField: "memberIds",
-            foreignField: "_id",
-            as: "members",
-          },
-        },
-        {
-          $project: {
-            _id: 1,
-            adminId: 1,
-            name: 1,
-            description: 1,
-            "members._id": 1,
-            "members.profileImagePath": 1,
-          },
-        },
-      ]);
-
-      return response.status(200).json(aggregate[0]);
+      const group = await Group.getGroupById(request.params.groupId);
+      return response.status(200).json(group);
     } catch (error: any) {
       console.error(error);
       return response.status(500).json(error);
@@ -142,29 +102,8 @@ export default {
         );
       }
 
-      const aggregate = await Group.aggregate([
-        { $match: { _id: groupId } },
-        {
-          $lookup: {
-            from: "users",
-            localField: "memberIds",
-            foreignField: "_id",
-            as: "members",
-          },
-        },
-        {
-          $project: {
-            _id: 1,
-            adminId: 1,
-            name: 1,
-            description: 1,
-            "members._id": 1,
-            "members.profileImagePath": 1,
-          },
-        },
-      ]);
-
-      return response.status(200).json(aggregate[0]);
+      group = await Group.getGroupById(groupId);
+      return response.status(200).json(group);
     } catch (error: any) {
       console.error(error);
       return response.status(500).json(error);

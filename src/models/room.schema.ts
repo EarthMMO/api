@@ -1,12 +1,12 @@
-import mongoose from "mongoose";
+import { Schema, model } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 
 export const CHAT_ROOM_TYPES = {
-  CONSUMER_TO_CONSUMER: "consumer-to-consumer",
-  CONSUMER_TO_SUPPORT: "consumer-to-support",
+  PARTY: "party",
+  GUILD: "guild",
 };
 
-const chatRoomSchema = new mongoose.Schema(
+const RoomSchema = new Schema(
   {
     _id: {
       type: String,
@@ -21,7 +21,38 @@ const chatRoomSchema = new mongoose.Schema(
   }
 );
 
-chatRoomSchema.statics.initiateChat = async function (
+/**
+ * @param {String} userId - id of user
+ * @return {Array} array of all chatrooms that the user belongs to
+ */
+RoomSchema.statics.getChatRoomsByUserId = async function (userId) {
+  try {
+    const rooms = await this.find({ userIds: { $all: [userId] } });
+    return rooms;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * @param {String} roomId - id of chatroom
+ * @return {Object} chatroom
+ */
+RoomSchema.statics.getChatRoomByRoomId = async function (roomId) {
+  try {
+    const room = await this.findOne({ _id: roomId });
+    return room;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * @param {Array} userIds - array of strings of userIds
+ * @param {String} chatInitiator - user who initiated the chat
+ * @param {CHAT_ROOM_TYPES} type
+ */
+RoomSchema.statics.initiateChat = async function (
   userIds,
   type,
   chatInitiator
@@ -56,4 +87,4 @@ chatRoomSchema.statics.initiateChat = async function (
   }
 };
 
-export default mongoose.model("ChatRoom", chatRoomSchema);
+export default model("room", RoomSchema);

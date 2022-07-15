@@ -27,7 +27,7 @@ const GroupSchema = new Schema<IGroup>(
     description: {
       type: String,
     },
-    memberIds: [String],
+    memberIds: Array,
     maxGroupSize: Number,
   },
   {
@@ -35,6 +35,60 @@ const GroupSchema = new Schema<IGroup>(
   }
 );
 
-const GroupModel = model<IGroup>("group", GroupSchema);
+GroupSchema.statics.getAllGroups = async function () {
+  try {
+    return this.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "memberIds",
+          foreignField: "_id",
+          as: "members",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          adminId: 1,
+          name: 1,
+          description: 1,
+          "members._id": 1,
+          "members.profileImagePath": 1,
+        },
+      },
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
 
-export default GroupModel;
+GroupSchema.statics.getGroupById = async function (groupId) {
+  try {
+    const aggregate = await this.aggregate([
+      { $match: { _id: groupId } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "memberIds",
+          foreignField: "_id",
+          as: "members",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          adminId: 1,
+          name: 1,
+          description: 1,
+          "members._id": 1,
+          "members.profileImagePath": 1,
+        },
+      },
+    ]);
+    return aggregate[0];
+  } catch (error) {
+    throw error;
+  }
+};
+
+export default model<IGroup>("group", GroupSchema);

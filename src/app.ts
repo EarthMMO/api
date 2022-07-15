@@ -15,6 +15,7 @@ import defaultLogger, { logger } from "utils/logger";
 import errorMiddleware from "middlewares/error.middleware";
 import eventRouter from "routes/event.router";
 import groupRouter from "routes/group.router";
+import roomRouter from "routes/room.router";
 import userRouter from "routes/user.router";
 import { connect } from "utils/db_connect";
 
@@ -84,9 +85,10 @@ httpServer.listen(port, async () => {
   process.env.SEED_HEX = seed.toString("hex");
 
   const CORE_API_PATH_PREFIX = `/api/v${process.env.SERVER_VERSION as string}`;
-  app.use(`${CORE_API_PATH_PREFIX}/user`, userRouter);
   app.use(`${CORE_API_PATH_PREFIX}/event`, eventRouter);
   app.use(`${CORE_API_PATH_PREFIX}/group`, groupRouter);
+  app.use(`${CORE_API_PATH_PREFIX}/room`, roomRouter);
+  app.use(`${CORE_API_PATH_PREFIX}/user`, userRouter);
   app.use(errorMiddleware);
 
   logger.info(`Server running on ${process.env.SERVER_ADDRESS}:${port}`);
