@@ -1,45 +1,31 @@
 import { Request, Response } from "express";
-import { v4 as uuidv4 } from "uuid";
 
 import CustomError from "exceptions/custom_error";
-import Group, { IGroup } from "models/group.schema";
-import UserModel from "models/user.schema";
+import Group from "models/group.schema";
+import User from "models/user.schema";
 import { UserRequest } from "middlewares/validate_jwt.middleware";
 
 export interface GroupResponse {
-  id?: string;
-  adminId?: string;
-  name: string;
+  _id: string;
+  adminId: string;
   description?: string;
   maxGroupSize: number;
-  members: string[];
+  memberIds: string[];
+  name: string;
 }
-
-const sanitizeGroupResponse = (group: IGroup): GroupResponse => {
-  const _group: any = group;
-  delete _group._id;
-  return _group;
-};
 
 export default {
   onCreateGroup: async (request: UserRequest, response: Response) => {
     try {
       const { description, maxGroupSize, name } = request.body;
       const adminId = request.userDetails?.id as string;
-      const admin = await UserModel.findOne({ id: adminId });
 
       const group = await Group.create({
-        id: uuidv4(),
         adminId,
         name,
         description,
         maxGroupSize,
-        members: [
-          {
-            id: adminId,
-            profileImagePath: admin?.profileImagePath,
-          },
-        ],
+        memberIds: [adminId],
       });
 
       return response.status(200).json(group);
@@ -50,11 +36,27 @@ export default {
   },
   onGetAllGroups: async (request: Request, response: Response) => {
     try {
-      const groups = await Group.find();
-      const sanitizedGroups = groups.map((group: any) =>
-        sanitizeGroupResponse(group)
-      );
-      return response.status(200).json(sanitizedGroups);
+      const groups = await Group.aggregate([
+        {
+          $lookup: {
+            from: "users",
+            localField: "memberIds",
+            foreignField: "_id",
+            as: "members",
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            adminId: 1,
+            name: 1,
+            description: 1,
+            "members._id": 1,
+            "members.profileImagePath": 1,
+          },
+        },
+      ]);
+      return response.status(200).json(groups);
     } catch (error: any) {
       console.error(error);
       return response.status(500).json(error);
@@ -62,9 +64,29 @@ export default {
   },
   onGetGroupById: async (request: Request, response: Response) => {
     try {
-      const group = await Group.findOne({ id: request.params.groupId });
-      const sanitizedGroup = sanitizeGroupResponse(group!);
-      return response.status(200).json(sanitizedGroup);
+      const aggregate = await Group.aggregate([
+        { $match: { _id: request.params.groupId } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "memberIds",
+            foreignField: "_id",
+            as: "members",
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            adminId: 1,
+            name: 1,
+            description: 1,
+            "members._id": 1,
+            "members.profileImagePath": 1,
+          },
+        },
+      ]);
+
+      return response.status(200).json(aggregate[0]);
     } catch (error: any) {
       console.error(error);
       return response.status(500).json(error);
@@ -76,15 +98,15 @@ export default {
       const userId = request.body.userId;
       const action = request.body.action;
 
-      const user = await UserModel.findOne({ id: userId });
-      let group = await Group.findOne({ id: groupId });
+      const user = await User.findOne({ _id: userId });
+      let group = await Group.findOne({ _id: groupId });
 
       if (!user || !group) {
         throw new CustomError("Invalid userId or groupId", 400, "00003", {});
       }
       if (
         action === "join" &&
-        group?.members.length! + 1 > +group?.maxGroupSize!
+        group?.memberIds.length! + 1 > +group?.maxGroupSize!
       ) {
         throw new CustomError(
           "Can not add more participants!",
@@ -96,13 +118,10 @@ export default {
 
       if (action === "join") {
         group = await Group.findOneAndUpdate(
-          { id: groupId },
+          { _id: groupId },
           {
             $push: {
-              members: {
-                id: userId,
-                profileImagePath: user.profileImagePath,
-              },
+              memberIds: userId,
             },
           },
           {
@@ -111,12 +130,10 @@ export default {
         );
       } else if (action === "leave") {
         group = await Group.findOneAndUpdate(
-          { id: groupId },
+          { _id: groupId },
           {
             $pull: {
-              members: {
-                id: userId,
-              },
+              memberIds: userId,
             },
           },
           {
@@ -125,7 +142,29 @@ export default {
         );
       }
 
-      return response.status(200).json(group);
+      const aggregate = await Group.aggregate([
+        { $match: { _id: groupId } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "memberIds",
+            foreignField: "_id",
+            as: "members",
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            adminId: 1,
+            name: 1,
+            description: 1,
+            "members._id": 1,
+            "members.profileImagePath": 1,
+          },
+        },
+      ]);
+
+      return response.status(200).json(aggregate[0]);
     } catch (error: any) {
       console.error(error);
       return response.status(500).json(error);
