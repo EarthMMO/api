@@ -16,6 +16,7 @@ import errorMiddleware from "middlewares/error.middleware";
 import eventRouter from "routes/event.router";
 import groupRouter from "routes/group.router";
 import userRouter from "routes/user.router";
+import friendsRouter from "routes/friends.router";
 import { connect } from "utils/db_connect";
 
 dotenv.config();
@@ -87,6 +88,7 @@ httpServer.listen(port, async () => {
   app.use(`${CORE_API_PATH_PREFIX}/user`, userRouter);
   app.use(`${CORE_API_PATH_PREFIX}/event`, eventRouter);
   app.use(`${CORE_API_PATH_PREFIX}/group`, groupRouter);
+  app.use(`${CORE_API_PATH_PREFIX}/friends`, friendsRouter);
   app.use(errorMiddleware);
 
   logger.info(`Server running on ${process.env.SERVER_ADDRESS}:${port}`);

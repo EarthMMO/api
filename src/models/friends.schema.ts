@@ -16,8 +16,8 @@ const friendsSchema = new Schema<Friend>(
       type: String,
       default: () => uuidv4().replaceAll("-", ""),
     },
-    requester: { type: Schema.Types.ObjectId, ref: 'Users'},
-    recipient: { type: Schema.Types.ObjectId, ref: 'Users'},
+    requester: { type: Schema.Types.ObjectId, ref: 'User'},
+    recipient: { type: Schema.Types.ObjectId, ref: 'User'},
     status: {
         type: Number,
         enums: [
