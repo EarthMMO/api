@@ -1,6 +1,5 @@
 import { Schema, model } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
-import { Friend } from './friends.schema';
 export interface IUser {
   _id: string;
   firstName: string;
@@ -15,7 +14,7 @@ export interface IUser {
   signature?: string;
   derivationSuffix: number;
   NFTs: Array<NFT>;
-  friends: Array<Friend>;
+  friends: string[];
 }
 
 export interface NFT {
@@ -86,7 +85,7 @@ const UserSchema = new Schema<IUser>(
       type: Number,
       required: true,
     },
-    friends: [{ type: Schema.Types.ObjectId, ref: "Friends" }],
+    friends: [{ type: String, ref: "Friends" }],
   },
   {
     timestamps: true,
