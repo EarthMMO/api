@@ -1,12 +1,10 @@
 import { Schema, model } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 
-import { IUser } from "models/user.schema";
-
 export interface Friend {
   _id: string;
-  requester: IUser,
-  recipient: IUser,
+  requesterId: String,
+  recipientId: String,
   status: number
 }
 
@@ -16,8 +14,8 @@ const friendsSchema = new Schema<Friend>(
       type: String,
       default: () => uuidv4().replaceAll("-", ""),
     },
-    requester: { type: Schema.Types.ObjectId, ref: 'User'},
-    recipient: { type: Schema.Types.ObjectId, ref: 'User'},
+    requesterId: { type: String, required: true },
+    recipientId: { type: String, required: true },
     status: {
         type: Number,
         enums: [
