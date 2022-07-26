@@ -4,6 +4,10 @@ import Friend from "models/friends.schema";
 import User from "models/user.schema";
 
 export default {
+  // @desc Send request to friend => status 0 => return ?
+  // @route POST /api/SERVER_VERSION/friends/:requesterId/:recipientId
+  // @access Private
+  // TODO: make the route private
   onSendFriendRequest: async (request: Request, response: Response) => {
     try {
       const { requesterId, recipientId } = request.params;
@@ -19,6 +23,10 @@ export default {
       return response.status(500).json(error);
     }
   },
+  // @desc Accept a friend request
+  // @route PATCH /api/SERVER_VERSION/friends/:requesterId/:recipientId
+  // @access Private
+  // TODO: make the route private
   onAcceptFriendRequest: async (request: Request, response: Response) => {
     try {
       const { requesterId, recipientId } = request.params;
@@ -27,7 +35,8 @@ export default {
           recipientId,
           status: 1
         },
-        { status: 2 });
+        { status: 2 },
+        { new: true });
       const user1 = await User.findOne({ _id: requesterId })
       if (user1) {
         user1.friends = [...user1.friends, recipientId]
@@ -44,19 +53,50 @@ export default {
       return response.status(500).json(error);
     }
   },
+  // @desc Get all friends based on userId
+  // @route GET /api/SERVER_VERSION/friends/:userId
+  // @access Private
+  // TODO: make the route private
   onGetAllFriends: async (request: Request, response: Response) => {
      try {
-      console.log('##########', request.params);
-
+      const friends = await User
+        .findOne({ _id: request.params.userId })
+        .populate('friends')
+        .select('friends');
+      return response.status(200).json(friends);
      } catch (error) {
       console.error(error);
       return response.status(500).json(error);
      }
-  } 
+  },
+  // @desc Delete a friend
+  // @route DELETE /api/SERVER_VERSION/friends/:deleteUid
+  // @access Private
+  // TODO: make the route private
+  onDeleteFriend: async (request: Request, response: Response) => {
+    try {
+      const friendToRemove = request.params.deleteUid;
+      const userId = request.body.userId
+      const user = await User.findByIdAndUpdate(
+        { _id: userId },
+        { $pull: { friends: friendToRemove } },
+        { new: true }
+        );
+      // remove from friends collection
+      await Friend.findOneAndDelete(
+        { $or: [{ requesterId: userId, recipientId: friendToRemove }, { requesterId: friendToRemove, recipientId: userId }] }
+        );
+      return response.status(200).json(user);
+    } catch (error) {
+      console.error(error);
+      return response.status(500).json(error);
+    }
+  }
   // send request to friend => status 0 => return ?
   // reject request from other account => status 1 => return ?
   // accept and add to friends => status 2 => return friend data
   // remove friendship => delete entry?
   // block user => status 3 => return ?
   // unblock user
+  // get all friends requests
 };

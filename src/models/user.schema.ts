@@ -85,7 +85,7 @@ const UserSchema = new Schema<IUser>(
       type: Number,
       required: true,
     },
-    friends: [{ type: String, ref: "Friends" }],
+    friends: [{ type: String, ref: "User" }],
   },
   {
     timestamps: true,
