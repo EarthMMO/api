@@ -76,13 +76,12 @@ export default {
         messageText: request.body.messageText,
       };
       const currentLoggedUser = request.userDetails?.id as string;
-      const post = await Message.createPostInChatRoom(
+      const message = await Message.createMessageInChatRoom(
         roomId,
         messagePayload,
         currentLoggedUser
       );
-      global.io.sockets.in(roomId).emit("new message", { message: post });
-      return response.status(200).json({ success: true, post });
+      return response.status(200).json({ success: true, message });
     } catch (error) {
       console.error(error);
       return response.status(500).json({ success: false, error: error });

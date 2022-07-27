@@ -16,6 +16,7 @@ router
     validateJWT,
     upload.single("image"),
     user.onUploadUserImage
-  );
+  )
+  .patch("/:userId/remove", user.onRemoveUserImage);
 
 export default router;

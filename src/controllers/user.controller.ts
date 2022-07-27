@@ -36,13 +36,14 @@ export default {
       }
       const userId = user._id;
       const derivationSuffix = user.derivationSuffix;
+      const profileImagePath = user.profileImagePath;
 
       const jwt = await createToken(
         { id: userId, ethereumAddress, suffix: derivationSuffix },
         generateSecret(derivationSuffix)
       );
 
-      return response.status(200).json({ jwt, userId });
+      return response.status(200).json({ jwt, userId, profileImagePath });
     } catch (error: any) {
       console.error(error);
       return response.status(500).json(error);
@@ -85,9 +86,24 @@ export default {
   onUploadUserImage: async (request: Request, response: Response) => {
     try {
       const userId = request.params.userId;
-      const user = await User.updateOne(
+      const user = await User.findOneAndUpdate(
         { _id: userId },
-        { profileImagePath: request.file.path }
+        { profileImagePath: request.file.path },
+        { new: true }
+      );
+      return response.status(200).json(user);
+    } catch (error: any) {
+      console.error(error);
+      return response.status(500).json(error);
+    }
+  },
+  onRemoveUserImage: async (request: Request, response: Response) => {
+    try {
+      const userId = request.params.userId;
+      const user = await User.findOneAndUpdate(
+        { _id: userId },
+        { $unset: { profileImagePath: 1 } },
+        { new: true }
       );
       return response.status(200).json(user);
     } catch (error: any) {

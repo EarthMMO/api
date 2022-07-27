@@ -72,6 +72,7 @@ const httpServer = createServer(app);
 
 // Create socket connection
 global.io = new Server(httpServer);
+//global.io.of("/thomas").on("connection", WebSockets.connection);
 global.io.on("connection", WebSockets.connection);
 
 httpServer.listen(port, async () => {

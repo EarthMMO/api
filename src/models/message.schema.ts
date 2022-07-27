@@ -46,7 +46,7 @@ const MessageSchema = new Schema(
  * @param {Object} message - message you want to post in the chat room
  * @param {String} postedByUser - user who is posting the message
  */
-MessageSchema.statics.createPostInChatRoom = async function (
+MessageSchema.statics.createMessageInChatRoom = async function (
   chatRoomId,
   message,
   postedByUser
