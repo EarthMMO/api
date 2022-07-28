@@ -20,9 +20,9 @@ const friendsSchema = new Schema<Friend>(
         type: Number,
         enums: [
             0,    //'requested',
-            1,    //'requested',
-            2,    //'accepted',
-            3,    //'blocked'
+            1,    //'accepted',
+            2,    //'declined',
+            3,    //'canceled'
         ]
       }
     },

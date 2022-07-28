@@ -14,9 +14,12 @@ export interface IUser {
   signature?: string;
   derivationSuffix: number;
   NFTs: Array<NFT>;
-  friends: string[];
+  friends: Array<IFriend>;
 }
-
+export interface IFriend {
+  friendId: string,
+  status: number
+}
 export interface NFT {
   name?: string;
   contractAddress?: string;
@@ -85,7 +88,12 @@ const UserSchema = new Schema<IUser>(
       type: Number,
       required: true,
     },
-    friends: [{ type: String, ref: "User" }],
+    friends: [
+      {
+        friendId: { type: String, ref: "User" },
+        status: {type: Number, enum: [0, 1, 2, 3]}
+      }
+    ],
   },
   {
     timestamps: true,

@@ -76,7 +76,7 @@ global.io.on("connection", WebSockets.connection);
 
 httpServer.listen(port, async () => {
   await connect();
-  if (port !== "8000") {
+  if (port !== "6001") {
     getNetworkAddress();
   } else {
     process.env.SERVER_ADDRESS = "localhost";
