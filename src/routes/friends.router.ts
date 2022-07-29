@@ -12,6 +12,8 @@ router
     .patch("/cancel/:recipientId", validateJWT, friends.onCancelFriendRequest)
     .delete("/remove:deleteUid", validateJWT, friends.onRemoveFriend)
     .get("/:userId", validateJWT, friends.onGetAllFriends)
+    .get("/incoming/:userId", validateJWT, friends.onGetAllRequestsIncoming)
+    .get("/outgoing/:userId", validateJWT, friends.onGetAllRequestsOutgoing);
   
 
 export default router;

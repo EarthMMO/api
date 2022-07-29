@@ -151,6 +151,32 @@ export default {
       return response.status(500).json(error);
      }
   },
+  // @desc Get all incoming requests based on userId
+  // @route GET /api/SERVER_VERSION/friends/incoming/:userId
+  // @access Private
+  onGetAllRequestsIncoming: async (request: Request, response: Response) => {
+    try {
+      const { userId } = request.params;
+      const requests = await Friend.find({ recipientId: userId, status: 0 })
+      return response.status(200).json(requests);
+    } catch (error) {
+      console.error(error);
+      return response.status(500).json(error);
+    }
+  },
+  // @desc Get all outgoing requests based on userId
+  // @route GET /api/SERVER_VERSION/friends/outgoing/:userId
+  // @access Private
+  onGetAllRequestsOutgoing: async (request: Request, response: Response) => {
+    try {
+      const { userId } = request.params;
+      const requests = await Friend.find({ requesterId: userId, status: 0 })
+      return response.status(200).json(requests);
+    } catch (error) {
+      console.error(error);
+      return response.status(500).json(error);
+    }
+  }
   // add cancel friend request
   // get all requests incoming
   // get all requests sent
